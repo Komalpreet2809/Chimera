@@ -17,7 +17,7 @@ Runs **CPU-first, GPU-ready** (CUDA auto-detected).
 Each phase is *understand-first, then build*:
 
 - **Phase 0** — Foundations: what inference is, why generation is a loop
-- **Phase 1** — The transformer / tiny GPT *(in progress)*
+- **Phase 1** — The transformer / tiny GPT ✅
 - **Phase 2** — KV Cache
 - **Phase 3** — Inference Engine
 - **Phase 4** — Scheduling & continuous batching
@@ -37,9 +37,17 @@ Each phase is *understand-first, then build*:
 
 ```bash
 cd backend
-python scripts/step1_smoke.py   # verifies tokenizer + real GPT-2 weights load
+python scripts/step1_smoke.py     # verify tokenizer + real GPT-2 weights load
+python scripts/generate_demo.py   # our from-scratch GPT generates real text
 ```
 
 ## Status
 
-Phase 1, Build Step 1 complete: project scaffold, tokenizer wrapper, and real GPT-2 weight loading verified.
+**Phase 1 complete.** A GPT-2 built entirely from first principles — hand-written
+embedding, multi-head causal attention, MLP, LayerNorm, residuals, and unembed —
+that loads real pretrained weights and generates coherent text. Correctness is
+verified against HuggingFace GPT-2 (logits match to ~5e-5). The naive generation
+loop deliberately has no KV cache yet, so its per-token cost grows with sequence
+length — the motivation for Phase 2.
+
+Model code lives in [`backend/chimera/model/`](backend/chimera/model/).
