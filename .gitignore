@@ -1,0 +1,42 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# ---- Env / secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- ML / model caches ----
+# Pretrained weights are downloaded on demand, never committed.
+*.bin
+*.safetensors
+*.pt
+*.pth
+.cache/
+models_cache/
+
+# ---- Node / Next.js (frontend, later phases) ----
+node_modules/
+.next/
+out/
+.vercel/
+
+# ---- Editors / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- Data / logs ----
+*.log
+data/
+*.sqlite
