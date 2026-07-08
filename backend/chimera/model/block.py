@@ -29,10 +29,16 @@ class TransformerBlock(nn.Module):
         self.mlp = MLP(config)                 # compute
 
     def forward(
-        self, x: torch.Tensor, return_attn: bool = False
+        self,
+        x: torch.Tensor,
+        return_attn: bool = False,
+        cache=None,
+        layer_idx: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         # Communicate: attention reads normalized x, result added to the highway.
-        attn_out, attn_weights = self.attn(self.ln_1(x), return_attn=return_attn)
+        attn_out, attn_weights = self.attn(
+            self.ln_1(x), return_attn=return_attn, cache=cache, layer_idx=layer_idx
+        )
         x = x + attn_out
         # Compute: MLP reads normalized x, result added to the highway.
         x = x + self.mlp(self.ln_2(x))

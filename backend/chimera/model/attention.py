@@ -36,12 +36,21 @@ class MultiHeadAttention(nn.Module):
         self.c_proj = nn.Linear(config.n_embd, config.n_embd)
 
     def forward(
-        self, x: torch.Tensor, return_attn: bool = False
+        self,
+        x: torch.Tensor,
+        return_attn: bool = False,
+        cache=None,
+        layer_idx: int = 0,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
-        """x: (batch, seq, n_embd) -> same shape, but context-enriched."""
+        """x: (batch, seq, n_embd) -> same shape, but context-enriched.
+
+        With a KVCache (Phase 2): x holds only the NEW tokens (whole prompt at
+        prefill, 1 token per decode step). We append their K,V to the cache and
+        attend over everything cached so far. Queries are never cached (Bite 2).
+        """
         B, T, C = x.shape
 
-        # --- 1. Produce Q, K, V for every token (Bite 6) ---
+        # --- 1. Produce Q, K, V for the new tokens only (Bite 6) ---
         # Project to 3*C, then split into three (B, T, C) tensors.
         q, k, v = self.c_attn(x).split(self.n_embd, dim=2)
 
@@ -51,16 +60,29 @@ class MultiHeadAttention(nn.Module):
         k = k.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
         v = v.view(B, T, self.n_head, self.head_dim).transpose(1, 2)
 
-        # --- 3. Scores: every query dotted with every key (Bites 7-8) ---
-        # (B, h, T, d) @ (B, h, d, T) -> (B, h, T, T): the relevance grid.
+        # --- 2b. KV cache (Phase 2, Bite 3) ---
+        # Append the new K,V; get back the FULL history to attend over.
+        # NOTE: past_len must come from THIS layer's tensors (total - new), not
+        # cache.seq_len — earlier layers have already appended this step's
+        # token by the time later layers run, so seq_len would be off by one.
+        if cache is not None:
+            k, v = cache.append(layer_idx, k, v)
+        T_total = k.size(2)   # cached tokens + new tokens
+        past_len = T_total - T  # 0 when no cache / prefill-from-empty
+
+        # --- 3. Scores: every (new) query dotted with every key (Bites 7-8) ---
+        # (B, h, T, d) @ (B, h, d, T_total) -> (B, h, T, T_total).
         scores = q @ k.transpose(-2, -1)
         # Scale by sqrt(head_dim) = sqrt(64) = 8, to keep magnitudes sane (Bite 8).
         scores = scores / math.sqrt(self.head_dim)
 
         # --- 4. Causal mask: forbid looking at the future (Bite 11) ---
-        # Build a lower-triangular allow-map; set forbidden cells to -inf so
-        # softmax gives them exactly 0 weight.
-        causal = torch.tril(torch.ones(T, T, device=x.device, dtype=torch.bool))
+        # Query i sits at ABSOLUTE position past_len+i, so it may see keys
+        # 0..past_len+i. With no cache (past_len=0) this is the usual triangle;
+        # for a single decode token it's a full row of ✓ (all past is visible).
+        q_pos = torch.arange(T, device=x.device).unsqueeze(1) + past_len
+        k_pos = torch.arange(T_total, device=x.device).unsqueeze(0)
+        causal = k_pos <= q_pos                              # (T, T_total)
         scores = scores.masked_fill(~causal, float("-inf"))
 
         # --- 5. Softmax: scores -> weights that sum to 1 per row (Bite 8) ---
