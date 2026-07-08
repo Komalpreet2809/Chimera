@@ -18,7 +18,7 @@ Each phase is *understand-first, then build*:
 
 - **Phase 0** — Foundations: what inference is, why generation is a loop
 - **Phase 1** — The transformer / tiny GPT ✅
-- **Phase 2** — KV Cache
+- **Phase 2** — KV Cache ✅
 - **Phase 3** — Inference Engine
 - **Phase 4** — Scheduling & continuous batching
 - **Phase 5** — PagedAttention *(flagship)*
@@ -37,17 +37,21 @@ Each phase is *understand-first, then build*:
 
 ```bash
 cd backend
-python scripts/step1_smoke.py     # verify tokenizer + real GPT-2 weights load
-python scripts/generate_demo.py   # our from-scratch GPT generates real text
+python scripts/step1_smoke.py       # verify tokenizer + real GPT-2 weights load
+python scripts/generate_demo.py     # our from-scratch GPT generates real text
+python scripts/phase2_benchmark.py  # naive vs KV-cached generation, measured
 ```
 
 ## Status
 
-**Phase 1 complete.** A GPT-2 built entirely from first principles — hand-written
+**Phases 1–2 complete.** A GPT-2 built entirely from first principles — hand-written
 embedding, multi-head causal attention, MLP, LayerNorm, residuals, and unembed —
 that loads real pretrained weights and generates coherent text. Correctness is
-verified against HuggingFace GPT-2 (logits match to ~5e-5). The naive generation
-loop deliberately has no KV cache yet, so its per-token cost grows with sequence
-length — the motivation for Phase 2.
+verified against HuggingFace GPT-2 (logits match to ~5e-5).
+
+Phase 2 adds a hand-built KV cache: prefill fills it in one pass, decode feeds
+only the newest token per step. Cached generation is token-for-token identical
+to the naive loop, with per-step cost ~constant instead of growing with sequence
+length (measured on CPU: 5.9× faster at 64 tokens, 46× at 900).
 
 Model code lives in [`backend/chimera/model/`](backend/chimera/model/).

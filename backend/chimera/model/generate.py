@@ -4,11 +4,11 @@ We yield one token at a time (a Python generator) rather than returning the whol
 string, because the per-token stream is the raw material for the live telemetry
 timeline in later phases.
 
-IMPORTANT — the crime scene (Phase 0, Bite 5): this loop feeds the ENTIRE
-sequence-so-far back through the model every single step. Step N reprocesses all
-N tokens from scratch, even though the first N-1 haven't changed. That wasted
-quadratic recompute is exactly what KV Cache (Phase 2) will fix. We build the
-honest, slow version first so the speedup is measurable.
+Two paths, switchable with use_cache:
+  - naive (Phase 1): feeds the ENTIRE sequence back every step — the O(N^2)
+    recompute crime, kept around so the speedup stays measurable.
+  - cached (Phase 2): prefill the prompt once to fill the KVCache, then decode
+    by feeding ONLY the newest token per step (~constant work per token).
 """
 
 from __future__ import annotations
@@ -52,18 +52,42 @@ def generate(
     prompt_ids: list[int],
     cfg: SampleConfig | None = None,
     device: str | None = None,
+    use_cache: bool = True,
 ) -> Iterator[int]:
-    """Yield generated token ids one at a time, autoregressively."""
+    """Yield generated token ids one at a time, autoregressively.
+
+    use_cache=False keeps the naive Phase-1 loop (feed everything, every step)
+    so the two paths can be benchmarked against each other.
+    """
     cfg = cfg or SampleConfig()
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
 
     ids = torch.tensor([prompt_ids], device=device)      # (1, seq)
 
-    for _ in range(cfg.max_new_tokens):
-        # THE CRIME: feed the whole sequence every step (no cache yet).
-        logits, _ = model(ids)
-        next_id = _pick_next(logits[0, -1], cfg)          # only last position matters
+    if not use_cache:
+        for _ in range(cfg.max_new_tokens):
+            # THE CRIME: feed the whole sequence every step (no cache).
+            logits, _ = model(ids)
+            next_id = _pick_next(logits[0, -1], cfg)      # only last position matters
+            yield next_id
+            # append and loop — the sequence grows by one each step (Phase 0).
+            ids = torch.cat([ids, torch.tensor([[next_id]], device=device)], dim=1)
+        return
+
+    # --- cached path (Phase 2) ---
+    from .kv_cache import KVCache
+
+    cache = KVCache(model.config)
+
+    # PREFILL: one fat pass over the whole prompt, filling the cache (Bite 5).
+    logits, _ = model(ids, cache=cache)
+    next_id = _pick_next(logits[0, -1], cfg)
+    yield next_id
+
+    # DECODE: many skinny passes — feed ONLY the newest token each step (Bite 3).
+    for _ in range(cfg.max_new_tokens - 1):
+        one = torch.tensor([[next_id]], device=device)
+        logits, _ = model(one, cache=cache)
+        next_id = _pick_next(logits[0, -1], cfg)
         yield next_id
-        # append and loop — the sequence grows by one each step (Phase 0, Bite 2).
-        ids = torch.cat([ids, torch.tensor([[next_id]], device=device)], dim=1)
