@@ -23,22 +23,29 @@ class Embedding(nn.Module):
         # wpe: position embedding table — (n_ctx, n_embd), one row per position
         self.wpe = nn.Embedding(config.n_ctx, config.n_embd)
 
-    def forward(self, token_ids: torch.Tensor, pos_offset: int = 0) -> torch.Tensor:
+    def forward(
+        self, token_ids: torch.Tensor, pos_offset: int | torch.Tensor = 0
+    ) -> torch.Tensor:
         """token_ids: (batch, seq) integers  ->  (batch, seq, n_embd) vectors.
 
         pos_offset (Phase 2): during cached decode we feed only the newest
         token, but its position is NOT 0 — it's wherever the sequence
         currently ends (= how many tokens are already in the KV cache).
+
+        Phase 4: in a batched decode step, each row is at a DIFFERENT length,
+        so pos_offset may be a (batch,) tensor of per-row offsets.
         """
         _, seq_len = token_ids.shape
 
         # "what each token is" — grab each token's row from wte.
         tok_vecs = self.wte(token_ids)                     # (batch, seq, n_embd)
 
-        # "where each token is" — positions offset..offset+seq-1.
-        positions = torch.arange(
-            pos_offset, pos_offset + seq_len, device=token_ids.device
-        )
+        # "where each token is" — positions offset..offset+seq-1 (per row if batched).
+        steps = torch.arange(seq_len, device=token_ids.device)
+        if isinstance(pos_offset, torch.Tensor):
+            positions = pos_offset.unsqueeze(1) + steps    # (batch, seq)
+        else:
+            positions = pos_offset + steps                 # (seq,)
         pos_vecs = self.wpe(positions)                     # (seq, n_embd)
 
         # Add them: every vector now carries BOTH identity and position (Bite 3).

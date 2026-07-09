@@ -41,6 +41,7 @@ class MultiHeadAttention(nn.Module):
         return_attn: bool = False,
         cache=None,
         layer_idx: int = 0,
+        key_padding_mask: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         """x: (batch, seq, n_embd) -> same shape, but context-enriched.
 
@@ -84,6 +85,15 @@ class MultiHeadAttention(nn.Module):
         k_pos = torch.arange(T_total, device=x.device).unsqueeze(0)
         causal = k_pos <= q_pos                              # (T, T_total)
         scores = scores.masked_fill(~causal, float("-inf"))
+
+        # --- 4b. Padding mask (Phase 4) ---
+        # In a batched step, rows with shorter caches are left-padded to the
+        # longest; those pad slots hold garbage and must get zero attention.
+        # key_padding_mask: (B, T_total), True = real slot, False = padding.
+        if key_padding_mask is not None:
+            scores = scores.masked_fill(
+                ~key_padding_mask[:, None, None, :], float("-inf")
+            )
 
         # --- 5. Softmax: scores -> weights that sum to 1 per row (Bite 8) ---
         attn = F.softmax(scores, dim=-1)                    # (B, h, T, T)

@@ -102,6 +102,62 @@ class InferenceEngine:
             num_generated=req.num_generated,
         )
 
+    # ---- the batched operation (Phase 4) ----
+    @torch.no_grad()
+    def step_decode_batch(self, reqs: list[Request]) -> list[StepEvent]:
+        """One decode step for MANY requests in a single forward pass.
+
+        All requests must already be DECODING (prefill runs per-request via
+        step()). The weights get hauled from memory once and applied to every
+        row — this is the whole point of batching (Bite 1).
+        """
+        from .batch import BatchedKVCache
+
+        assert all(r.state == RequestState.DECODING for r in reqs)
+
+        # Stack each request's newest token: (B, 1).
+        input_ids = torch.tensor(
+            [[r.generated_ids[-1]] for r in reqs], device=self.device
+        )
+        bcache = BatchedKVCache([r.kv_cache for r in reqs])
+
+        t0 = time.perf_counter()
+        logits, _ = self.model(
+            input_ids,
+            cache=bcache,
+            pos_offset=bcache.pos_offsets(self.device),
+            key_padding_mask=bcache.padding_mask(self.device),
+        )
+        if self.device == "cuda":
+            torch.cuda.synchronize()
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+
+        events = []
+        for i, req in enumerate(reqs):
+            next_id = _pick_next(logits[i, -1], self.sample_cfg)
+            req.generated_ids.append(next_id)
+
+            cache_tokens = req.kv_cache.seq_len
+            cache_bytes = req.kv_cache.memory_bytes()
+            if next_id == GPT2_EOS:
+                req.finish(FinishReason.EOS)
+            elif req.num_generated >= req.max_new_tokens:
+                req.finish(FinishReason.LENGTH)
+
+            events.append(
+                StepEvent(
+                    request_id=req.id,
+                    kind="decode",
+                    token_id=next_id,
+                    token_text=self.tokenizer.decode([next_id]),
+                    latency_ms=latency_ms,  # shared: one pass served all rows
+                    cache_tokens=cache_tokens,
+                    cache_bytes=cache_bytes,
+                    num_generated=req.num_generated,
+                )
+            )
+        return events
+
     # ---- convenience ----
     def text_of(self, req: Request) -> str:
         """The full text (prompt + generation) of a request so far."""

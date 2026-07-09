@@ -34,10 +34,15 @@ class TransformerBlock(nn.Module):
         return_attn: bool = False,
         cache=None,
         layer_idx: int = 0,
+        key_padding_mask=None,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         # Communicate: attention reads normalized x, result added to the highway.
         attn_out, attn_weights = self.attn(
-            self.ln_1(x), return_attn=return_attn, cache=cache, layer_idx=layer_idx
+            self.ln_1(x),
+            return_attn=return_attn,
+            cache=cache,
+            layer_idx=layer_idx,
+            key_padding_mask=key_padding_mask,
         )
         x = x + attn_out
         # Compute: MLP reads normalized x, result added to the highway.

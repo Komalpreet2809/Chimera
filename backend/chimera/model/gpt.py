@@ -33,20 +33,34 @@ class GPT(nn.Module):
         self.lm_head.weight = self.embedding.wte.weight
 
     def forward(
-        self, token_ids: torch.Tensor, return_attn: bool = False, cache=None
+        self,
+        token_ids: torch.Tensor,
+        return_attn: bool = False,
+        cache=None,
+        pos_offset: int | torch.Tensor | None = None,
+        key_padding_mask: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, list[torch.Tensor]]:
         """token_ids: (batch, seq) -> logits: (batch, seq, vocab_size).
 
         With a KVCache: token_ids holds only the NEW tokens; positions and the
         causal mask are offset by how many tokens the cache already holds.
+        Phase 4 (batched decode): pos_offset may be per-row (batch,), and
+        key_padding_mask marks which stacked-cache slots are real vs padding.
         """
         # Positions continue from where the cache left off (0 if no cache).
-        pos_offset = cache.seq_len if cache is not None else 0
+        if pos_offset is None:
+            pos_offset = cache.seq_len if cache is not None else 0
         x = self.embedding(token_ids, pos_offset)    # ints -> vectors (+position)
 
         attentions: list[torch.Tensor] = []
         for i, block in enumerate(self.blocks):      # communicate/compute x12
-            x, attn = block(x, return_attn=return_attn, cache=cache, layer_idx=i)
+            x, attn = block(
+                x,
+                return_attn=return_attn,
+                cache=cache,
+                layer_idx=i,
+                key_padding_mask=key_padding_mask,
+            )
             if return_attn and attn is not None:
                 attentions.append(attn)
 
