@@ -19,7 +19,7 @@ Each phase is *understand-first, then build*:
 - **Phase 0** — Foundations: what inference is, why generation is a loop
 - **Phase 1** — The transformer / tiny GPT ✅
 - **Phase 2** — KV Cache ✅
-- **Phase 3** — Inference Engine
+- **Phase 3** — Inference Engine ✅
 - **Phase 4** — Scheduling & continuous batching
 - **Phase 5** — PagedAttention *(flagship)*
 - **Phase 6** — Speculative decoding
@@ -40,11 +40,12 @@ cd backend
 python scripts/step1_smoke.py       # verify tokenizer + real GPT-2 weights load
 python scripts/generate_demo.py     # our from-scratch GPT generates real text
 python scripts/phase2_benchmark.py  # naive vs KV-cached generation, measured
+python scripts/phase3_engine_demo.py # engine interleaving two requests, live events
 ```
 
 ## Status
 
-**Phases 1–2 complete.** A GPT-2 built entirely from first principles — hand-written
+**Phases 1–3 complete.** A GPT-2 built entirely from first principles — hand-written
 embedding, multi-head causal attention, MLP, LayerNorm, residuals, and unembed —
 that loads real pretrained weights and generates coherent text. Correctness is
 verified against HuggingFace GPT-2 (logits match to ~5e-5).
@@ -54,4 +55,10 @@ only the newest token per step. Cached generation is token-for-token identical
 to the naive loop, with per-step cost ~constant instead of growing with sequence
 length (measured on CPU: 5.9× faster at 64 tokens, 46× at 900).
 
-Model code lives in [`backend/chimera/model/`](backend/chimera/model/).
+Phase 3 adds the InferenceEngine: each prompt becomes a Request with a
+lifecycle (WAITING → PREFILLING → DECODING → FINISHED) and its own KV cache;
+`step()` advances any request by exactly one unit, so multiple generations
+interleave; every step emits a StepEvent (token, latency, cache size) — the
+per-token stream the telemetry and UI will consume.
+
+Model code: [`backend/chimera/model/`](backend/chimera/model/) · Engine: [`backend/chimera/engine/`](backend/chimera/engine/).
