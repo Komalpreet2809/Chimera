@@ -20,7 +20,7 @@ Each phase is *understand-first, then build*:
 - **Phase 1** — The transformer / tiny GPT ✅
 - **Phase 2** — KV Cache ✅
 - **Phase 3** — Inference Engine ✅
-- **Phase 4** — Scheduling & continuous batching
+- **Phase 4** — Scheduling & continuous batching ✅
 - **Phase 5** — PagedAttention *(flagship)*
 - **Phase 6** — Speculative decoding
 - **Phase 7** — Telemetry pipeline
@@ -41,11 +41,12 @@ python scripts/step1_smoke.py       # verify tokenizer + real GPT-2 weights load
 python scripts/generate_demo.py     # our from-scratch GPT generates real text
 python scripts/phase2_benchmark.py  # naive vs KV-cached generation, measured
 python scripts/phase3_engine_demo.py # engine interleaving two requests, live events
+python scripts/phase4_showdown.py   # sequential vs static vs continuous batching
 ```
 
 ## Status
 
-**Phases 1–3 complete.** A GPT-2 built entirely from first principles — hand-written
+**Phases 1–4 complete.** A GPT-2 built entirely from first principles — hand-written
 embedding, multi-head causal attention, MLP, LayerNorm, residuals, and unembed —
 that loads real pretrained weights and generates coherent text. Correctness is
 verified against HuggingFace GPT-2 (logits match to ~5e-5).
@@ -60,5 +61,12 @@ lifecycle (WAITING → PREFILLING → DECODING → FINISHED) and its own KV cach
 `step()` advances any request by exactly one unit, so multiple generations
 interleave; every step emits a StepEvent (token, latency, cache size) — the
 per-token stream the telemetry and UI will consume.
+
+Phase 4 adds batched decode (many requests, one forward pass — per-row
+positions, left-padded stacked caches, padding mask; batched output verified
+token-identical to solo) and a scheduler with three raceable policies.
+Measured on the same 20-user workload: sequential 9.8 tok/s (avg TTFT 25.8s) →
+static batching 26.3 tok/s (43% seat utilization: stragglers) → continuous
+batching 36.2 tok/s, TTFT 3.4s, 80% utilization.
 
 Model code: [`backend/chimera/model/`](backend/chimera/model/) · Engine: [`backend/chimera/engine/`](backend/chimera/engine/).
