@@ -6,6 +6,18 @@
 
 Modern LLM tools (ChatGPT, Claude, Cursor) hide *why* generation is slow or fast, why memory explodes, and what techniques like KV cache, continuous batching, PagedAttention, and speculative decoding actually do. Chimera exposes all of it — a real, hand-built inference engine emitting per-token telemetry, made watchable in the browser.
 
+## Results so far
+
+Every number below is reproducible from the scripts in this repo.
+
+| | Result | How it's measured |
+|---|---|---|
+| **Correctness** | Logits match HuggingFace GPT-2 to **5e-5** | Hand-built modules vs. the reference implementation, same weights |
+| **KV cache** | Up to **46× faster** decode steps (453ms → 96ms @ 900 tokens) | `phase2_benchmark.py` — output stays token-for-token identical |
+| **Continuous batching** | **3.7× throughput** (9.8 → 36.2 tok/s) | `phase4_showdown.py` — 20-user workload, 8 seats |
+| **Time-to-first-token** | **7.6× faster** (25.8s → 3.4s) | same run, vs. sequential serving |
+| **GPU seat utilization** | **43% → 80%** vs. static batching | stragglers no longer hold seats hostage |
+
 ## Approach
 
 The engine is built **from first principles** — every transformer module (embedding, attention, MLP, LayerNorm) is implemented by hand and loads real pretrained GPT-2 weights, so output is coherent *and* every tensor is understood. No `generate()` black boxes.
