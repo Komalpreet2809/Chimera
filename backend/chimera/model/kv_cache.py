@@ -47,6 +47,18 @@ class KVCache:
             self._v[layer] = torch.cat([self._v[layer], v_new], dim=2)
         return self._k[layer], self._v[layer]
 
+    def truncate_to(self, length: int) -> None:
+        """Drop everything past `length` tokens — undo a rejected speculation.
+
+        Speculative decoding (Phase 6) advances the cache with guessed tokens;
+        when the target model rejects them, the cache must be rewound to the
+        tokens we actually committed to.
+        """
+        for layer in range(self.n_layer):
+            if self._k[layer] is not None and self._k[layer].size(2) > length:
+                self._k[layer] = self._k[layer][:, :, :length, :]
+                self._v[layer] = self._v[layer][:, :, :length, :]
+
     def memory_bytes(self) -> int:
         """Total bytes held — the 'price tag' from Bite 4, measurable live.
 
