@@ -32,11 +32,14 @@ class InferenceEngine:
         tokenizer: Tokenizer,
         device: str | None = None,
         sample_cfg: SampleConfig | None = None,
+        kv_pool=None,   # PagedKVPool -> paged KV memory (Phase 5); None -> contiguous
     ) -> None:
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device).eval()
         self.tokenizer = tokenizer
         self.sample_cfg = sample_cfg or SampleConfig()
+        # The block pool must live wherever the model lives.
+        self.kv_pool = kv_pool.to(self.device) if kv_pool is not None else None
         self.requests: dict[int, Request] = {}   # the table of live requests
 
     # ---- intake ----
@@ -63,7 +66,7 @@ class InferenceEngine:
         if req.state == RequestState.WAITING:
             # ---- PREFILL: fill the cache with the whole prompt (Phase 2, Bite 5)
             req.state = RequestState.PREFILLING
-            req.init_cache(self.model.config)
+            req.init_cache(self.model.config, pool=self.kv_pool)
             input_ids = torch.tensor([req.prompt_ids], device=self.device)
             kind = "prefill"
         else:

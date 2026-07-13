@@ -54,10 +54,15 @@ class Request:
     def is_finished(self) -> bool:
         return self.state == RequestState.FINISHED
 
-    def init_cache(self, config: GPTConfig) -> None:
-        self.kv_cache = KVCache(config)
+    def init_cache(self, config: GPTConfig, pool=None) -> None:
+        """Contiguous KVCache by default; a paged cache if a block pool is given."""
+        self.kv_cache = pool.new_cache() if pool is not None else KVCache(config)
 
     def finish(self, reason: FinishReason) -> None:
         self.state = RequestState.FINISHED
         self.finish_reason = reason
-        self.kv_cache = None  # reclaim the cache memory (Bite 2: FINISHED frees)
+        # Reclaim memory. A paged cache hands its blocks back to the pool, where
+        # they're instantly reusable by a queued request (Phase 5).
+        if self.kv_cache is not None and hasattr(self.kv_cache, "free"):
+            self.kv_cache.free()
+        self.kv_cache = None
