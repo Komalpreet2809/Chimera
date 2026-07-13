@@ -17,6 +17,7 @@ Endpoints:
 from __future__ import annotations
 
 import asyncio
+import os
 import time
 
 import torch
@@ -36,12 +37,28 @@ from ..model.weights import load_pretrained
 from ..telemetry.metrics import MetricsCollector
 
 app = FastAPI(title="Chimera", description="LLM inference, made visible")
+
+# The deployed backend is a public read-only demo API, but there's no reason to
+# let arbitrary origins call it — pin to the real frontends plus local dev.
+_ALLOWED = [
+    "https://chimera.komalpreet.me",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED,
+    # Vercel preview deployments get a generated *.vercel.app hostname.
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# On a free CPU Space a naive 900-token forward pass takes seconds; cap the
+# live benchmark so it can't wedge the box. Full-length runs stay available
+# locally via backend/scripts/phase2_benchmark.py.
+BENCH_MAX_SEQ = int(os.environ.get("CHIMERA_BENCH_MAX_SEQ", "900"))
+BENCH_MAX_ITERS = int(os.environ.get("CHIMERA_BENCH_MAX_ITERS", "5"))
 
 # ---- loaded once at startup ----
 STATE: dict = {}
@@ -309,6 +326,11 @@ def bench_cache(req: CacheBenchReq) -> dict:
     model = model.to(device)
     one = torch.zeros(1, 1, dtype=torch.long, device=device)
 
+    # Clamp the requested work — a public endpoint shouldn't let a caller ask
+    # for a 4000-token naive forward pass on a 2-vCPU box.
+    seq_lens = sorted({n for n in req.seq_lens if 1 <= n <= BENCH_MAX_SEQ})[:6]
+    iters = max(1, min(req.iters, BENCH_MAX_ITERS))
+
     def sync() -> None:
         if device == "cuda":
             torch.cuda.synchronize()
@@ -326,7 +348,7 @@ def bench_cache(req: CacheBenchReq) -> dict:
         return samples[len(samples) // 2]
 
     rows = []
-    for n in req.seq_lens:
+    for n in seq_lens:
         seq = torch.zeros(1, n, dtype=torch.long, device=device)
 
         # Warm up at THIS shape — the first call at a new shape pays one-time
@@ -334,14 +356,14 @@ def bench_cache(req: CacheBenchReq) -> dict:
         for _ in range(2):
             model(seq)
         sync()
-        naive = median_ms(lambda: model(seq), req.iters)
+        naive = median_ms(lambda: model(seq), iters)
 
         cache = KVCache(GPT2_SMALL)
         model(seq, cache=cache)          # prefill (not timed — happens once)
         for _ in range(2):
             model(one, cache=cache)
         sync()
-        cached = median_ms(lambda: model(one, cache=cache), req.iters + 3)
+        cached = median_ms(lambda: model(one, cache=cache), iters + 3)
 
         rows.append({
             "seq_len": n,

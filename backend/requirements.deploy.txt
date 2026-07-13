@@ -1,0 +1,8 @@
+# Runtime deps for the deployed backend.
+# torch is installed separately in the Dockerfile from the CPU-only index —
+# the default wheel pulls in ~3GB of CUDA libraries we can't use on a CPU Space.
+transformers>=4.40
+fastapi>=0.110
+uvicorn[standard]>=0.27
+websockets>=12.0
+pydantic>=2.0
