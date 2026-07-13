@@ -278,37 +278,70 @@ def attention(req: AttentionReq) -> dict:
 # ------------------------------------------------------------ benchmarks
 class CacheBenchReq(BaseModel):
     seq_lens: list[int] = [64, 128, 256, 512]
+    # CPU by default, deliberately. See the note below.
+    device: str = "cpu"
+    iters: int = 5
 
 
 @app.post("/api/benchmark/cache")
 @torch.no_grad()
 def bench_cache(req: CacheBenchReq) -> dict:
-    """Per-step latency, naive vs KV-cached, at growing sequence lengths."""
-    model, device = STATE["model"], STATE["device"]
-    for _ in range(2):
-        model(torch.zeros(1, 16, dtype=torch.long, device=device))
-    if device == "cuda":
-        torch.cuda.synchronize()
+    """Per-step decode latency, naive vs KV-cached, at growing sequence lengths.
+
+    Why the default is CPU, not the GPU:
+
+    The KV cache saves *compute* — it stops us re-processing the whole sequence
+    every step. You can only observe that saving on hardware where compute is
+    actually the bottleneck.
+
+    On a small model like GPT-2 (124M) on a laptop GPU, it isn't. Each op is so
+    tiny that the GPU never leaves its idle power state (measured: 210 MHz of a
+    3105 MHz clock, 1.65W), so every step is dominated by fixed kernel-launch
+    overhead at a throttled clock — ~80ms regardless of sequence length. The
+    algorithmic difference is real but completely masked by that floor.
+
+    On CPU the work is compute-bound, so the O(N)-per-step vs O(1)-per-step
+    difference shows up exactly as the theory predicts. Both are honest
+    measurements; only one of them is measuring the thing we're asking about.
+    """
+    model = STATE["model"]
+    device = "cuda" if (req.device == "cuda" and torch.cuda.is_available()) else "cpu"
+    model = model.to(device)
+    one = torch.zeros(1, 1, dtype=torch.long, device=device)
+
+    def sync() -> None:
+        if device == "cuda":
+            torch.cuda.synchronize()
+
+    def median_ms(fn, iters: int) -> float:
+        # Median, not mean: a single scheduler hiccup on a busy laptop can skew
+        # a mean badly (we saw a 3-sample mean report an impossible 220x).
+        samples = []
+        for _ in range(iters):
+            t = time.perf_counter()
+            fn()
+            sync()
+            samples.append((time.perf_counter() - t) * 1000)
+        samples.sort()
+        return samples[len(samples) // 2]
 
     rows = []
     for n in req.seq_lens:
         seq = torch.zeros(1, n, dtype=torch.long, device=device)
-        t = time.perf_counter()
-        for _ in range(3):
+
+        # Warm up at THIS shape — the first call at a new shape pays one-time
+        # allocation/planning cost that would otherwise pollute the timing.
+        for _ in range(2):
             model(seq)
-        if device == "cuda":
-            torch.cuda.synchronize()
-        naive = (time.perf_counter() - t) / 3 * 1000
+        sync()
+        naive = median_ms(lambda: model(seq), req.iters)
 
         cache = KVCache(GPT2_SMALL)
-        one = torch.zeros(1, 1, dtype=torch.long, device=device)
-        model(seq, cache=cache)
-        t = time.perf_counter()
-        for _ in range(3):
+        model(seq, cache=cache)          # prefill (not timed — happens once)
+        for _ in range(2):
             model(one, cache=cache)
-        if device == "cuda":
-            torch.cuda.synchronize()
-        cached = (time.perf_counter() - t) / 3 * 1000
+        sync()
+        cached = median_ms(lambda: model(one, cache=cache), req.iters + 3)
 
         rows.append({
             "seq_len": n,
@@ -316,6 +349,9 @@ def bench_cache(req: CacheBenchReq) -> dict:
             "cached_ms": round(cached, 2),
             "speedup": round(naive / cached, 1) if cached else 0,
         })
+
+    # restore the serving device so generation stays fast
+    model.to(STATE["device"])
     return {"device": device, "rows": rows}
 
 
