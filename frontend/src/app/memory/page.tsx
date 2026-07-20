@@ -205,10 +205,10 @@ function MemoryMap({
                     : kind === "wasted"
                       ? "var(--bad-fill)"
                       : "var(--panel-2)",
-                // Wasted blocks sat at 0.45, which washed rust out to a dusty
-                // pink over the cream ground; 0.72 keeps them clearly rust
-                // while still reading as secondary to the real data.
-                opacity: kind === "free" ? 1 : kind === "wasted" ? 0.72 : 0.95,
+                // Full strength throughout: any fade of rust over cream
+                // composites toward blush. The inks are already chosen to sit
+                // together, so they don't need turning down.
+                opacity: 1,
               }}
             />
           );
@@ -220,7 +220,7 @@ function MemoryMap({
           data ({usedMb.toFixed(0)} MB)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-sm bg-[var(--bad)]/50" /> wasted (
+          <span className="h-2 w-2 rounded-sm bg-[var(--bad-fill)]" /> wasted (
           {(totalMb - usedMb).toFixed(0)} MB)
         </span>
         <span className="flex items-center gap-1.5">

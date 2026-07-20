@@ -92,7 +92,7 @@ export default function BenchmarksPage() {
                     </span>
                     <div className="h-4 flex-1 overflow-hidden rounded bg-[var(--panel-2)]">
                       <div
-                        className="flex h-full items-center justify-end rounded bg-[var(--bad)]/70 pr-1.5"
+                        className="flex h-full items-center justify-end rounded bg-[var(--bad-fill)] pr-1.5"
                         style={{ width: `${(r.naive_ms / maxMs) * 100}%` }}
                       >
                         <span className="mono text-[9px] font-semibold text-white">

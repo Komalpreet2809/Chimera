@@ -70,7 +70,11 @@
   --violet-fill: var(--ink-4);
   --good-fill: var(--amber-4);
   --warn-fill: var(--amber-5);
-  --bad-fill: var(--rust-3);
+  /* Deeper than the text step on purpose: rust only reads as rust at full
+     strength. Faded over the cream ground it composites toward blush —
+     a8462b at 0.7 lands near rgb(192,119,98) — so marks take this step at
+     full opacity rather than a lighter one turned down. */
+  --bad-fill: var(--rust-2);
 
   /* Washes stay near-neutral warm tints: the plate shouldn't add colour of
      its own, only the figure sitting on it should. */
