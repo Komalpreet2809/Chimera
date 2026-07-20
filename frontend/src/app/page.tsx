@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat, Toggle } from "@/components/ui";
-import { GenMsg, Metrics, stream, TokenMsg } from "@/lib/api";
+import { API_BASE, GenMsg, Metrics, stream, TokenMsg } from "@/lib/api";
 
 export default function InferenceLab() {
   const [prompt, setPrompt] = useState("The key to understanding transformers is");
@@ -136,7 +136,7 @@ export default function InferenceLab() {
 
       {error && (
         <div className="rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-4 py-3 text-xs text-[var(--bad)]">
-          {error} — is the backend running?
+          {error} — is the backend running at {API_BASE}?
         </div>
       )}
 

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button, Empty, PageHead, Panel } from "@/components/ui";
-import { AttentionResp, post } from "@/lib/api";
+import { API_BASE, AttentionResp, post } from "@/lib/api";
 
 export default function AttentionPage() {
   const [text, setText] = useState(
@@ -93,7 +93,7 @@ export default function AttentionPage() {
 
       {error && (
         <div className="rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-4 py-3 text-xs text-[var(--bad)]">
-          {error} — is the backend running on port 8000?
+          {error} — is the backend running at {API_BASE}?
         </div>
       )}
 
@@ -168,8 +168,11 @@ export default function AttentionPage() {
             future — a token can never look ahead)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-[var(--accent)]" /> strong
-            attention
+            <span
+              className="h-2.5 w-2.5 rounded-sm"
+              style={{ background: "rgb(196,131,26)" }}
+            />{" "}
+            strong attention
           </span>
           <span className="ml-auto">every row sums to 100%</span>
         </div>

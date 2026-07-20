@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
-import { PagedBench, post } from "@/lib/api";
+import { API_BASE, PagedBench, post } from "@/lib/api";
 
 export default function MemoryPage() {
   const [budget, setBudget] = useState(512);
@@ -80,7 +80,7 @@ export default function MemoryPage() {
 
       {error && (
         <div className="rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-4 py-3 text-xs text-[var(--bad)]">
-          {error} — is the backend running on port 8000?
+          {error} — is the backend running at {API_BASE}?
         </div>
       )}
 

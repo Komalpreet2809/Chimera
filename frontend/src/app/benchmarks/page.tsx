@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
-import { CacheBench, post } from "@/lib/api";
+import { API_BASE, CacheBench, post } from "@/lib/api";
 
 export default function BenchmarksPage() {
   const [data, setData] = useState<CacheBench | null>(null);
@@ -48,7 +48,7 @@ export default function BenchmarksPage() {
       >
         {error && (
           <div className="mb-3 rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-3 py-2 text-xs text-[var(--bad)]">
-            {error} — is the backend running on port 8000?
+            {error} — is the backend running at {API_BASE}?
           </div>
         )}
         {!data ? (

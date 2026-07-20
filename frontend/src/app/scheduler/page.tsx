@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
-import { SimDone, SimMsg, stream, TickMsg } from "@/lib/api";
+import { API_BASE, SimDone, SimMsg, stream, TickMsg } from "@/lib/api";
 
 const PROMPTS = [
   "The history of computing began",
@@ -139,7 +139,7 @@ export default function SchedulerPage() {
 
       {error && (
         <div className="rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-4 py-3 text-xs text-[var(--bad)]">
-          {error} — is the backend running on port 8000?
+          {error} — is the backend running at {API_BASE}?
         </div>
       )}
 
