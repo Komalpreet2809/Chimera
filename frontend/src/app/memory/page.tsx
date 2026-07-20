@@ -185,7 +185,8 @@ function MemoryMap({
   const CELLS = 240;
   const usedCells = Math.round((usedMb / budget) * CELLS);
   const wastedCells = Math.round(((totalMb - usedMb) / budget) * CELLS);
-  const color = tone === "good" ? "var(--good)" : "var(--accent)";
+  // Chart marks carry no text, so they take the brighter fill steps.
+  const color = tone === "good" ? "var(--good-fill)" : "var(--accent-fill)";
 
   return (
     <Panel title={title} subtitle={subtitle}>
@@ -202,7 +203,7 @@ function MemoryMap({
                   kind === "used"
                     ? color
                     : kind === "wasted"
-                      ? "var(--bad)"
+                      ? "var(--bad-fill)"
                       : "var(--panel-2)",
                 opacity: kind === "free" ? 1 : kind === "wasted" ? 0.45 : 0.9,
               }}

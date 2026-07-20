@@ -25,24 +25,52 @@
   --amber-soft: #fcd9a0;
   --brand: #f7a93b;
 
-  /* -- data palette: THREE inks, not five.
-        Five semantic slots never needed five hues — almost every view here is
-        a two-state comparison (cached vs not, used vs wasted, filled vs
-        empty), so more hues only added noise. Everything collapses onto the
-        brand's own two colours plus a single negative:
+  /* ============ data palette ============
+     Three hue families, each as an ordinal ramp. Series are separated by
+     STEP (lightness) rather than by reaching for a new hue, so the charts
+     stay as readable as a categorical palette while the page still only
+     contains the brand's own colours.
 
-          charcoal  the primary series — data, real, cached
-          amber     the good state — optimised, accepted, active, prefill
-          rust      the bad state — wasted, naive, empty
+     ink   — neutral: the primary series, real data, structure
+     amber — the good state: optimised, accepted, active, prefill
+     rust  — the bad state: wasted, naive, empty                          */
 
-        `good` and `warn` deliberately resolve to the same amber, and `violet`
-        to a warm grey, so a page shows at most charcoal + amber + rust + grey.
-        Kept as separate variables so call sites still read semantically. -- */
-  --accent: #35312a; /* primary / cached / real data — brand charcoal */
-  --warn: #9c650c; /* prefill / highlight — deep brand amber (4.6:1 as text) */
-  --good: #9c650c; /* optimised / accepted / filled — the same amber */
-  --bad: #a8462b; /* wasted / naive / empty — the one negative ink */
-  --violet: #6f665a; /* memory — warm grey, a neutral rather than a hue */
+  --ink-1: #26231d;
+  --ink-2: #3f3a31;
+  --ink-3: #5d564a;
+  --ink-4: #837a6a;
+  --ink-5: #b0a795;
+
+  --amber-1: #5c3a07;
+  --amber-2: #7d5109;
+  --amber-3: #9c650c;
+  --amber-4: #c4831a;
+  --amber-5: #e0a032;
+  --amber-6: #f2c877;
+
+  --rust-1: #6d2e1c;
+  --rust-2: #8c3a24;
+  --rust-3: #a8462b;
+  --rust-4: #c46a4f;
+  --rust-5: #dda593;
+
+  /* -- semantic tokens, for TEXT. Every one of these is set as type
+        somewhere, so each is a step dark enough to clear 4.5:1 on the cream
+        ground, and the steps are spread for separation. -- */
+  --accent: var(--ink-2); /* primary / cached / real data   10.0:1 */
+  --violet: var(--ink-3); /* memory — a lighter neutral      6.5:1 */
+  --good: var(--amber-3); /* optimised / accepted            4.6:1 */
+  --warn: var(--amber-2); /* prefill — a darker amber step   6.3:1 */
+  --bad: var(--rust-3); /* wasted / naive / empty            5.1:1 */
+
+  /* -- the same series as chart MARKS. Bars, blocks and cells carry no text,
+        so they can take brighter steps of the same ramps, which buys back all
+        the separation that the text-contrast floor costs. -- */
+  --accent-fill: var(--ink-2);
+  --violet-fill: var(--ink-4);
+  --good-fill: var(--amber-4);
+  --warn-fill: var(--amber-5);
+  --bad-fill: var(--rust-3);
 
   /* Washes stay near-neutral warm tints: the plate shouldn't add colour of
      its own, only the figure sitting on it should. */

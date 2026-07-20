@@ -194,7 +194,9 @@ export default function InferenceLab() {
                       style={{
                         height: `${Math.max(3, (t.latency_ms / maxLat) * 120)}px`,
                         background:
-                          t.kind === "prefill" ? "var(--warn)" : "var(--accent)",
+                          t.kind === "prefill"
+                            ? "var(--warn-fill)"
+                            : "var(--accent-fill)",
                       }}
                     />
                   </div>
@@ -253,7 +255,7 @@ export default function InferenceLab() {
                 {tokens.map((t, i) => (
                   <div
                     key={i}
-                    className="flex-1 rounded-t bg-[var(--violet)]/70"
+                    className="flex-1 rounded-t bg-[var(--violet-fill)]/85"
                     style={{
                       height: `${Math.max(2, (t.cache_bytes / maxCache) * 80)}px`,
                     }}
