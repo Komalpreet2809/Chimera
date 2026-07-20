@@ -4,6 +4,45 @@ import { useCallback, useEffect, useState } from "react";
 import { Button, Empty, PageHead, Panel } from "@/components/ui";
 import { API_BASE, AttentionResp, post } from "@/lib/api";
 
+/**
+ * Sequential ramp for the heatmap, built from the brand ramps.
+ *
+ * A single hue varied by opacity only travels cream -> amber, so every cell
+ * lands in the same pale band and the map reads flat. Real heat ramps move
+ * through lightness AND hue, so this walks paper -> amber -> rust: light and
+ * warm at the bottom, dark and saturated at the top. Same palette, far more
+ * dynamic range.
+ */
+const HEAT: [number, [number, number, number]][] = [
+  [0.0, [250, 244, 233]], // paper
+  [0.12, [246, 231, 203]], // amber wash
+  [0.35, [242, 200, 119]], // amber-6
+  [0.6, [224, 160, 50]], // amber-5
+  [0.78, [196, 131, 26]], // amber-4
+  [0.92, [140, 58, 36]], // rust-2
+  [1.0, [109, 46, 28]], // rust-1
+];
+
+function heat(v: number): string {
+  const t = Math.min(1, Math.max(0, v));
+  for (let i = 1; i < HEAT.length; i++) {
+    const [p1, c1] = HEAT[i];
+    if (t <= p1) {
+      const [p0, c0] = HEAT[i - 1];
+      const k = p1 === p0 ? 0 : (t - p0) / (p1 - p0);
+      const m = c0.map((c, j) => Math.round(c + (c1[j] - c) * k));
+      return `rgb(${m[0]},${m[1]},${m[2]})`;
+    }
+  }
+  const last = HEAT[HEAT.length - 1][1];
+  return `rgb(${last[0]},${last[1]},${last[2]})`;
+}
+
+/** Relative luminance, to decide whether a cell needs light or dark type. */
+function isDark(v: number): boolean {
+  return v > 0.55;
+}
+
 export default function AttentionPage() {
   const [text, setText] = useState(
     "The animal didn't cross the street because it was too tired"
@@ -137,16 +176,24 @@ export default function AttentionPage() {
                       key={c}
                       onMouseEnter={() => setHover({ r, c })}
                       onMouseLeave={() => setHover(null)}
-                      className="mono grid h-[30px] w-[34px] shrink-0 place-items-center border border-[var(--bg)] text-[9px] transition-transform hover:scale-110 hover:border-[var(--accent)]"
+                      className={`mono grid h-[30px] w-[34px] shrink-0 place-items-center rounded-[2px] text-[9px] font-medium transition-transform hover:z-10 hover:scale-125 hover:shadow-[0_2px_10px_rgba(26,26,24,0.25)] ${
+                        c > r ? "opacity-45" : ""
+                      }`}
                       style={{
-                        // Sequential amber ramp: attention is intensity, and
-                        // amber reads as heat. Opacity carries the value, so
-                        // the scale stays one hue from pale to strong.
+                        // Perceptual boost: attention is heavily skewed toward
+                        // a few large weights, so a linear map would leave most
+                        // cells indistinguishable. ^0.45 opens up the low end.
                         background:
+                          c > r ? "transparent" : heat(Math.pow(v, 0.45)),
+                        color:
                           c > r
-                            ? "var(--panel-2)"
-                            : `rgba(196,131,26,${Math.max(0.05, Math.pow(v, 0.55))})`,
-                        color: v > 0.45 ? "#2a1c05" : "var(--muted)",
+                            ? "transparent"
+                            : isDark(Math.pow(v, 0.45))
+                              ? "rgba(255,247,235,0.95)"
+                              : "rgba(42,28,5,0.75)",
+                        outline:
+                          c > r ? "1px dashed var(--line-soft)" : "none",
+                        outlineOffset: "-3px",
                       }}
                       title={
                         c > r
@@ -162,17 +209,26 @@ export default function AttentionPage() {
             </div>
           </div>
         )}
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-[10px] text-[var(--dim)]">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded-sm bg-[var(--panel-2)]" /> masked (the
-            future — a token can never look ahead)
+        <div className="mt-5 flex flex-wrap items-center gap-5 text-[10px] text-[var(--dim)]">
+          {/* the actual scale, not a single swatch standing in for it */}
+          <span className="flex items-center gap-2">
+            <span>0%</span>
+            <span
+              className="h-2.5 w-32 rounded-full"
+              style={{
+                background: `linear-gradient(to right, ${[0, 0.2, 0.4, 0.6, 0.8, 1]
+                  .map((s) => heat(s))
+                  .join(",")})`,
+              }}
+            />
+            <span>100% attention</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span
-              className="h-2.5 w-2.5 rounded-sm"
-              style={{ background: "rgb(196,131,26)" }}
+              className="h-2.5 w-2.5 rounded-[2px]"
+              style={{ outline: "1px dashed var(--line-soft)", outlineOffset: "-1px" }}
             />{" "}
-            strong attention
+            masked — the future, which a token can never look at
           </span>
           <span className="ml-auto">every row sums to 100%</span>
         </div>
