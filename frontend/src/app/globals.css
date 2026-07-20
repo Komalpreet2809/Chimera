@@ -25,22 +25,32 @@
   --amber-soft: #fcd9a0;
   --brand: #f7a93b;
 
-  /* -- data hues, drawn from the brand rather than from a stock palette.
-        Everything sits in the amber→rust→olive→plum arc anchored by the
-        brand's charcoal, so the charts belong to the same page as the
-        header. They still differ enough in hue AND lightness to stay
-        readable, because they carry meaning in the data views. -- */
-  --accent: #35312a; /* primary / cached / real data — the brand charcoal */
-  --warn: #9c650c; /* prefill — deep brand amber, dark enough to set as text (4.6:1) */
-  --bad: #b4472c; /* naive / waste — warm rust */
-  --good: #5f7036; /* paged / accepted — warm olive */
-  --violet: #7b5266; /* memory — warm plum */
+  /* -- data palette: THREE inks, not five.
+        Five semantic slots never needed five hues — almost every view here is
+        a two-state comparison (cached vs not, used vs wasted, filled vs
+        empty), so more hues only added noise. Everything collapses onto the
+        brand's own two colours plus a single negative:
 
-  --accent-wash: #e8e4db;
-  --warn-wash: #fae7c6;
-  --bad-wash: #f3dad2;
-  --good-wash: #e3e8d2;
-  --violet-wash: #ede0e6;
+          charcoal  the primary series — data, real, cached
+          amber     the good state — optimised, accepted, active, prefill
+          rust      the bad state — wasted, naive, empty
+
+        `good` and `warn` deliberately resolve to the same amber, and `violet`
+        to a warm grey, so a page shows at most charcoal + amber + rust + grey.
+        Kept as separate variables so call sites still read semantically. -- */
+  --accent: #35312a; /* primary / cached / real data — brand charcoal */
+  --warn: #9c650c; /* prefill / highlight — deep brand amber (4.6:1 as text) */
+  --good: #9c650c; /* optimised / accepted / filled — the same amber */
+  --bad: #a8462b; /* wasted / naive / empty — the one negative ink */
+  --violet: #6f665a; /* memory — warm grey, a neutral rather than a hue */
+
+  /* Washes stay near-neutral warm tints: the plate shouldn't add colour of
+     its own, only the figure sitting on it should. */
+  --accent-wash: #e9e5dc;
+  --warn-wash: #f6e7cb;
+  --good-wash: #f6e7cb;
+  --bad-wash: #eeddd4;
+  --violet-wash: #e9e5dc;
 
   /* tinted card surfaces (control bars) */
   --amber-tint: #fef4e4;

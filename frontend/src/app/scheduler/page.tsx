@@ -263,13 +263,13 @@ export default function SchedulerPage() {
                     className="flex-1 rounded-t"
                     style={{
                       height: `${Math.max(2, h.utilization * 110)}px`,
+                      // Two inks, three tiers: a full batch is solid amber, a
+                      // half-full one is the same amber faded, and a starved
+                      // batch turns rust. Fading rather than introducing a
+                      // third hue keeps the page to charcoal + amber + rust.
                       background:
-                        h.utilization > 0.75
-                          ? "var(--good)"
-                          : h.utilization > 0.5
-                            ? "var(--warn)"
-                            : "var(--bad)",
-                      opacity: 0.85,
+                        h.utilization > 0.5 ? "var(--good)" : "var(--bad)",
+                      opacity: h.utilization > 0.75 ? 0.9 : h.utilization > 0.5 ? 0.5 : 0.85,
                     }}
                     title={`tick ${h.tick}: ${(h.utilization * 100).toFixed(0)}%`}
                   />
