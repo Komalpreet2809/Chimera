@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Button, Empty, Panel, Stat } from "@/components/ui";
+import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { SimDone, SimMsg, stream, TickMsg } from "@/lib/api";
 
 const PROMPTS = [
@@ -79,9 +79,7 @@ export default function SchedulerPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold">Scheduler</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--muted)]">
+      <PageHead kicker="02 — Scheduler" title="Fill every seat.">
           12 users arrive at once wanting answers of very different lengths. Watch how
           each policy fills the GPU&apos;s batch slots. With{" "}
           <span className="text-[var(--text)]">static batching</span>, short requests
@@ -89,8 +87,7 @@ export default function SchedulerPage() {
           while one straggler runs on. With{" "}
           <span className="text-[var(--text)]">continuous batching</span>, a freed seat is
           refilled from the queue on the very next step.
-        </p>
-      </div>
+      </PageHead>
 
       <Panel>
         <div className="flex flex-wrap items-end gap-5">

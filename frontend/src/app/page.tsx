@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Button, Empty, Panel, Stat, Toggle } from "@/components/ui";
+import { Button, Empty, PageHead, Panel, Stat, Toggle } from "@/components/ui";
 import { GenMsg, Metrics, stream, TokenMsg } from "@/lib/api";
 
 export default function InferenceLab() {
@@ -73,15 +73,12 @@ export default function InferenceLab() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold">Inference Lab</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--muted)]">
-          Every token below comes from a GPT-2 built from scratch — hand-written
-          attention, KV cache, and sampling. The bars are the engine&apos;s real
-          per-token latency, not an animation. Switch the KV cache off and watch what it
-          costs to recompute the entire sequence on every single step.
-        </p>
-      </div>
+      <PageHead kicker="01 — Inference Lab" title="Watch it think.">
+        Every token below comes from a GPT-2 built from scratch — hand-written
+        attention, KV cache, and sampling. The bars are the engine&apos;s real
+        per-token latency, not an animation. Switch the KV cache off and watch what it
+        costs to recompute the entire sequence on every single step.
+      </PageHead>
 
       <Panel>
         <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
@@ -139,7 +136,7 @@ export default function InferenceLab() {
 
       {error && (
         <div className="rounded-lg border border-[var(--bad)]/40 bg-[var(--bad)]/10 px-4 py-3 text-xs text-[var(--bad)]">
-          {error} — is the backend running on port 8000?
+          {error} — is the backend running?
         </div>
       )}
 

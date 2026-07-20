@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Empty, Panel } from "@/components/ui";
+import { Button, Empty, PageHead, Panel } from "@/components/ui";
 import { AttentionResp, post } from "@/lib/api";
 
 export default function AttentionPage() {
@@ -36,9 +36,7 @@ export default function AttentionPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold">Attention</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--muted)]">
+      <PageHead kicker="04 — Attention" title="Who looks at whom?">
           Attention is the only place tokens look at each other. Each row is a token
           asking <em>&ldquo;who is relevant to me?&rdquo;</em>; each column is a token
           being looked at. The grid is strictly lower-triangular because a token may only
@@ -46,8 +44,7 @@ export default function AttentionPage() {
           what makes left-to-right generation possible. These are real weights pulled from
           the running model — all {data?.n_layer ?? 12} layers ×{" "}
           {data?.n_head ?? 12} heads are browsable.
-        </p>
-      </div>
+      </PageHead>
 
       <Panel>
         <div className="space-y-3">

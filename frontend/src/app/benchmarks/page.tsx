@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button, Empty, Panel, Stat } from "@/components/ui";
+import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { CacheBench, post } from "@/lib/api";
 
 export default function BenchmarksPage() {
@@ -32,13 +32,10 @@ export default function BenchmarksPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold">Benchmarks</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--muted)]">
+      <PageHead kicker="05 — Benchmarks" title="Measured, not claimed.">
           Measured live on this machine, right now — not numbers from a paper. Each row
           runs a real forward pass on the engine.
-        </p>
-      </div>
+      </PageHead>
 
       <Panel
         title="KV Cache — per-step decode latency"
@@ -115,7 +112,7 @@ export default function BenchmarksPage() {
                           width: `${Math.max((r.cached_ms / maxMs) * 100, 4)}%`,
                         }}
                       >
-                        <span className="mono text-[9px] font-semibold text-[#06121f]">
+                        <span className="mono text-[9px] font-semibold text-[var(--line)]">
                           {r.cached_ms.toFixed(0)}ms
                         </span>
                       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Empty, Panel, Stat } from "@/components/ui";
+import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { PagedBench, post } from "@/lib/api";
 
 export default function MemoryPage() {
@@ -37,9 +37,7 @@ export default function MemoryPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-lg font-semibold">Paged Memory</h1>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-[var(--muted)]">
+      <PageHead kicker="03 — Paged Memory" title="Stop wasting it.">
           A serving engine can&apos;t know how long a request will run, so the naive
           approach <span className="text-[var(--bad)]">reserves the worst case</span> —
           a contiguous slab big enough for the longest possible answer. Most requests
@@ -47,8 +45,7 @@ export default function MemoryPage() {
           borrows the operating system&apos;s answer: hand out small fixed{" "}
           <span className="text-[var(--good)]">blocks on demand</span>, and reclaim them
           the moment a request finishes.
-        </p>
-      </div>
+      </PageHead>
 
       <Panel>
         <div className="flex flex-wrap items-center gap-6">
