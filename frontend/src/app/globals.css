@@ -25,20 +25,22 @@
   --amber-soft: #fcd9a0;
   --brand: #f7a93b;
 
-  /* -- semantic hues: these encode meaning in the data views
-        (prefill / cached / naive / paged / memory), so they stay
-        clearly distinct even though the palette is warm. -- */
-  --accent: #2563eb; /* primary / cached */
-  --warn: #d97706; /* prefill */
-  --bad: #dc2626; /* naive / waste */
-  --good: #16a34a; /* paged / accepted */
-  --violet: #7c3aed; /* memory */
+  /* -- data hues, drawn from the brand rather than from a stock palette.
+        Everything sits in the amber→rust→olive→plum arc anchored by the
+        brand's charcoal, so the charts belong to the same page as the
+        header. They still differ enough in hue AND lightness to stay
+        readable, because they carry meaning in the data views. -- */
+  --accent: #35312a; /* primary / cached / real data — the brand charcoal */
+  --warn: #9c650c; /* prefill — deep brand amber, dark enough to set as text (4.6:1) */
+  --bad: #b4472c; /* naive / waste — warm rust */
+  --good: #5f7036; /* paged / accepted — warm olive */
+  --violet: #7b5266; /* memory — warm plum */
 
-  --accent-wash: #dbe7fe;
-  --warn-wash: #fdebd0;
-  --bad-wash: #fcdcdc;
-  --good-wash: #d6f0df;
-  --violet-wash: #e6dcfd;
+  --accent-wash: #e8e4db;
+  --warn-wash: #fae7c6;
+  --bad-wash: #f3dad2;
+  --good-wash: #e3e8d2;
+  --violet-wash: #ede0e6;
 
   /* tinted card surfaces (control bars) */
   --amber-tint: #fef4e4;
