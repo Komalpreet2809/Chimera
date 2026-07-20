@@ -203,7 +203,7 @@ function MemoryMap({
                   kind === "used"
                     ? color
                     : kind === "wasted"
-                      ? "var(--bad-fill)"
+                      ? "var(--dead)"
                       : "var(--panel-2)",
                 // Full strength throughout: any fade of rust over cream
                 // composites toward blush. The inks are already chosen to sit
@@ -220,7 +220,7 @@ function MemoryMap({
           data ({usedMb.toFixed(0)} MB)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-sm bg-[var(--bad-fill)]" /> wasted (
+          <span className="h-2 w-2 rounded-sm bg-[var(--dead)]" /> wasted (
           {(totalMb - usedMb).toFixed(0)} MB)
         </span>
         <span className="flex items-center gap-1.5">
