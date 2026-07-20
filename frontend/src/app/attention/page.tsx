@@ -139,11 +139,14 @@ export default function AttentionPage() {
                       onMouseLeave={() => setHover(null)}
                       className="mono grid h-[30px] w-[34px] shrink-0 place-items-center border border-[var(--bg)] text-[9px] transition-transform hover:scale-110 hover:border-[var(--accent)]"
                       style={{
+                        // Sequential amber ramp: attention is intensity, and
+                        // amber reads as heat. Opacity carries the value, so
+                        // the scale stays one hue from pale to strong.
                         background:
                           c > r
                             ? "var(--panel-2)"
-                            : `rgba(77,163,255,${Math.max(0.04, Math.pow(v, 0.55))})`,
-                        color: v > 0.5 ? "#06121f" : "var(--muted)",
+                            : `rgba(196,131,26,${Math.max(0.05, Math.pow(v, 0.55))})`,
+                        color: v > 0.45 ? "#2a1c05" : "var(--muted)",
                       }}
                       title={
                         c > r

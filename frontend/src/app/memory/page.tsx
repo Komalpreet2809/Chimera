@@ -205,7 +205,10 @@ function MemoryMap({
                     : kind === "wasted"
                       ? "var(--bad-fill)"
                       : "var(--panel-2)",
-                opacity: kind === "free" ? 1 : kind === "wasted" ? 0.45 : 0.9,
+                // Wasted blocks sat at 0.45, which washed rust out to a dusty
+                // pink over the cream ground; 0.72 keeps them clearly rust
+                // while still reading as secondary to the real data.
+                opacity: kind === "free" ? 1 : kind === "wasted" ? 0.72 : 0.95,
               }}
             />
           );
