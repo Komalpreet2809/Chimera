@@ -2,9 +2,11 @@
   <!-- Chimera mark: the causal-attention staircase, drawn as paged KV blocks.
        Row i may attend to columns 0..i — the lower-triangular mask that makes
        left-to-right generation possible, and the same grid PagedAttention
-       hands out in fixed-size blocks. -->
-  <rect x="1" y="1" width="30" height="30" rx="8" fill="#e8a33d" stroke="#22271c" stroke-width="2"/>
-  <g fill="#22271c">
+       hands out in fixed-size blocks.
+       Kept in sync with src/components/logo.tsx (a favicon is loaded as an
+       image, so it cannot read the page's CSS variables). -->
+  <rect x="0" y="0" width="32" height="32" rx="9" fill="#1a1a18"/>
+  <g fill="#f7a93b">
     <!-- row 0: sees itself -->
     <rect x="5" y="5" width="6" height="6" rx="1.5"/>
     <!-- row 1: sees 0,1 -->

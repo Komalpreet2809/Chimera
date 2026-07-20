@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Poppins } from "next/font/google";
 import Link from "next/link";
-import { Wordmark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
-const spaceGrotesk = Space_Grotesk({
+const instrument = Instrument_Serif({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  weight: "400",
+  style: "italic",
+  variable: "--font-instrument",
 });
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
@@ -24,24 +27,19 @@ export const metadata: Metadata = {
 };
 
 const NAV = [
-  { href: "/", label: "Inference Lab", n: "01" },
-  { href: "/scheduler", label: "Scheduler", n: "02" },
-  { href: "/memory", label: "Paged Memory", n: "03" },
-  { href: "/attention", label: "Attention", n: "04" },
-  { href: "/benchmarks", label: "Benchmarks", n: "05" },
+  { href: "/", label: "Inference Lab" },
+  { href: "/scheduler", label: "Scheduler" },
+  { href: "/memory", label: "Paged Memory" },
+  { href: "/attention", label: "Attention" },
+  { href: "/benchmarks", label: "Benchmarks" },
 ];
 
-/* The ticker carries the project's real measured results — decoration that
-   happens to be the headline evidence. */
-const TICKER = [
-  "GPT-2 BUILT FROM SCRATCH",
-  "5e-5 LOGIT ACCURACY",
-  "KV CACHE — 46× FASTER DECODE",
-  "CONTINUOUS BATCHING — 3.7× THROUGHPUT",
-  "TTFT 25.8s → 3.4s",
-  "PAGEDATTENTION — 80% → 6% WASTE",
-  "4.6× MORE CONCURRENT USERS",
-  "SPECULATIVE DECODING",
+/* The headline numbers, all measured — see the Benchmarks page. */
+const STATS = [
+  { value: "5e-5", label: "logit accuracy" },
+  { value: "46×", label: "faster decode" },
+  { value: "3.7×", label: "throughput" },
+  { value: "4.6×", label: "more users" },
 ];
 
 export default function RootLayout({
@@ -50,65 +48,120 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${spaceGrotesk.variable} ${jetbrains.variable}`}
+      className={`${poppins.variable} ${instrument.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-screen">
-        {/* ---- top marquee ---- */}
-        <div className="marquee border-b-2 border-[var(--line)] bg-[var(--line)] py-1.5 text-[var(--bg)]">
-          {[0, 1].map((dup) => (
-            <div className="marquee__track" key={dup} aria-hidden={dup === 1}>
-              {TICKER.map((t, i) => (
-                <span
-                  key={i}
-                  className="mono flex items-center gap-2.5 whitespace-nowrap text-[10px] font-medium tracking-[0.12em]"
-                >
-                  <span aria-hidden>✦</span>
-                  {t}
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
+        {/* ---- amber hero band ---- */}
+        <div className="relative overflow-hidden bg-[var(--amber)]">
+          {/* doodles */}
+          <svg
+            className="doodle absolute -left-6 top-10 h-24 w-24 opacity-30"
+            viewBox="0 0 100 100"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M12 78c14-10 8-30 22-40M30 84c16-11 10-34 26-45"
+              stroke="#1a1a18"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+          <svg
+            className="doodle absolute right-8 top-6 h-16 w-16 opacity-30"
+            viewBox="0 0 100 100"
+            fill="none"
+            aria-hidden
+          >
+            <path
+              d="M50 8v22M74 26L60 40M26 26l14 14M86 60H64M14 60h22"
+              stroke="#1a1a18"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
 
-        {/* ---- header ---- */}
-        <header className="sticky top-0 z-50 border-b-2 border-[var(--line)] bg-[var(--bg)]/92 backdrop-blur">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
-            <Link href="/" aria-label="Chimera — home">
-              <Wordmark animate />
+          <header className="relative mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4">
+            <Link href="/" className="flex shrink-0 items-center gap-2.5">
+              <Logo size={30} animate />
+              <span className="display text-[18px] font-semibold tracking-tight">
+                Chimera
+              </span>
             </Link>
 
-            <nav className="ml-auto flex flex-wrap items-center gap-1.5">
+            <nav className="flex flex-wrap items-center gap-1">
               {NAV.map((n) => (
                 <Link
                   key={n.href}
                   href={n.href}
-                  className="group flex items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-transparent px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition-all hover:border-[var(--line)] hover:bg-[var(--panel)] hover:text-[var(--text)]"
+                  className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium text-[var(--text)]/75 transition-colors hover:bg-[#1a1a18]/10 hover:text-[var(--text)]"
                 >
-                  <span className="mono text-[9px] opacity-50">{n.n}</span>
                   {n.label}
                 </Link>
               ))}
             </nav>
+
+            <a
+              href="https://github.com/Komalpreet2809/Chimera"
+              target="_blank"
+              rel="noreferrer"
+              className="ml-auto rounded-full bg-[var(--text)] px-4 py-2 text-[13px] font-medium text-white transition-opacity hover:opacity-85"
+            >
+              Source ↗
+            </a>
+          </header>
+
+          {/* headline */}
+          <div className="relative mx-auto max-w-[1400px] px-6 pb-9 pt-4">
+            <h1 className="display max-w-[19ch] text-[clamp(30px,4.6vw,52px)] leading-[1.12]">
+              See what an LLM actually{" "}
+              <span className="circled">does</span> when it
+              generates a token.
+            </h1>
+            <p className="mt-3.5 max-w-[62ch] text-[14px] leading-relaxed text-[var(--text)]/70">
+              A GPT-2 built from scratch — attention, KV cache, continuous batching,
+              PagedAttention and speculative decoding, all hand-written — streaming
+              its own internals live as it runs.
+            </p>
+
+            {/* stat strip */}
+            <div className="mt-7 flex flex-wrap items-center gap-y-4">
+              {STATS.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`pr-7 ${i > 0 ? "border-l border-[#1a1a18]/20 pl-7" : ""}`}
+                >
+                  <div className="mono text-[22px] font-bold leading-none tabular-nums">
+                    {s.value}
+                  </div>
+                  <div className="mt-1 text-[11px] text-[var(--text)]/60">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </header>
+        </div>
 
-        <main className="mx-auto max-w-[1400px] px-6 py-8">{children}</main>
+        <main className="mx-auto max-w-[1400px] px-6 py-9">{children}</main>
 
-        <footer className="mt-12 border-t-2 border-[var(--line)] bg-[var(--panel)]">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-4 px-6 py-6">
-            <div className="display text-[13px] tracking-wide">
-              CHIMERA <span className="opacity-40">✦</span>{" "}
-              <span className="font-normal opacity-60">
-                an LLM inference engine you can watch
-              </span>
+        <footer className="mt-14 bg-[var(--dark)] text-[#f6f1e8]">
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-5 px-6 py-9">
+            <div>
+              <div className="display flex items-center gap-2.5 text-[17px] font-semibold">
+                <Logo size={26} />
+                Chimera
+              </div>
+              <p className="mt-2 max-w-[46ch] text-[13px] leading-relaxed text-white/55">
+                An LLM inference engine built from first principles, and the
+                instruments to watch it run.
+              </p>
             </div>
             <a
               href="https://github.com/Komalpreet2809/Chimera"
               target="_blank"
               rel="noreferrer"
-              className="sticker px-4 py-1.5 text-[11px] font-bold tracking-wide transition-transform hover:-translate-y-0.5"
+              className="rounded-full bg-[var(--amber)] px-5 py-2.5 text-[13px] font-medium text-[var(--text)] transition-opacity hover:opacity-90"
             >
-              SOURCE ↗
+              View source ↗
             </a>
           </div>
         </footer>

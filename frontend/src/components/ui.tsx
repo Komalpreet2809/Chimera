@@ -18,11 +18,13 @@ export function Panel({
   return (
     <div className={`panel ${className}`}>
       {(title || right) && (
-        <div className="flex items-start justify-between gap-4 border-b-2 border-[var(--line)] px-4 py-3">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--line)] px-5 py-3.5">
           <div>
-            {title && <h3 className="section-label text-[var(--text)]">{title}</h3>}
+            {title && (
+              <h3 className="text-[14px] font-semibold text-[var(--text)]">{title}</h3>
+            )}
             {subtitle && (
-              <p className="mt-1 text-[11px] leading-snug text-[var(--muted)]">
+              <p className="mt-1 text-[12px] leading-snug text-[var(--muted)]">
                 {subtitle}
               </p>
             )}
@@ -30,7 +32,7 @@ export function Panel({
           {right}
         </div>
       )}
-      <div className="p-4">{children}</div>
+      <div className="p-5">{children}</div>
     </div>
   );
 }
@@ -57,24 +59,24 @@ export function Stat({
   tone?: keyof typeof TONES;
   hint?: string;
 }) {
-  const { fg, bg } = TONES[tone];
+  const { fg } = TONES[tone];
   return (
-    <div
-      className="rounded-[10px] border-2 border-[var(--line)] px-3 py-2.5"
-      style={{ background: bg, boxShadow: "var(--shadow-sm)" }}
-    >
-      <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--muted)]">
+    <div className="panel px-4 py-3.5">
+      <div className="text-[11px] font-medium uppercase tracking-[0.09em] text-[var(--dim)]">
         {label}
       </div>
       <div className="mono mt-1.5 flex items-baseline gap-1">
-        <span className="text-[22px] font-bold tabular-nums leading-none" style={{ color: fg }}>
+        <span
+          className="text-[24px] font-bold leading-none tabular-nums"
+          style={{ color: fg }}
+        >
           {value}
         </span>
-        {unit && (
-          <span className="text-[11px] font-medium text-[var(--muted)]">{unit}</span>
-        )}
+        {unit && <span className="text-[12px] text-[var(--muted)]">{unit}</span>}
       </div>
-      {hint && <div className="mt-1 text-[10px] text-[var(--muted)]">{hint}</div>}
+      {hint && (
+        <div className="mt-1.5 text-[11px] leading-snug text-[var(--muted)]">{hint}</div>
+      )}
     </div>
   );
 }
@@ -104,20 +106,20 @@ export function Toggle({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        className={`mt-0.5 flex h-[20px] w-[36px] shrink-0 items-center rounded-full border-2 border-[var(--line)] transition-colors ${
-          checked ? "bg-[var(--good)]" : "bg-[var(--panel-2)]"
+        className={`mt-0.5 flex h-[22px] w-[38px] shrink-0 items-center rounded-full transition-colors ${
+          checked ? "bg-[var(--text)]" : "bg-[#dcd3c5]"
         }`}
       >
         <span
-          className={`block h-3 w-3 rounded-full border-2 border-[var(--line)] bg-[var(--bg)] transition-transform ${
-            checked ? "translate-x-[17px]" : "translate-x-[2px]"
+          className={`block h-[16px] w-[16px] rounded-full bg-white shadow-sm transition-transform ${
+            checked ? "translate-x-[19px]" : "translate-x-[3px]"
           }`}
         />
       </button>
       <span>
-        <span className="block text-xs font-bold text-[var(--text)]">{label}</span>
+        <span className="block text-[13px] font-medium text-[var(--text)]">{label}</span>
         {hint && (
-          <span className="block text-[10px] leading-snug text-[var(--muted)]">
+          <span className="block text-[11px] leading-snug text-[var(--muted)]">
             {hint}
           </span>
         )}
@@ -138,18 +140,13 @@ export function Button({
   variant?: "primary" | "ghost";
 }) {
   const base =
-    "rounded-full border-2 border-[var(--line)] px-4 py-2 text-xs font-bold tracking-wide transition-all active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0";
+    "rounded-full px-5 py-2.5 text-[13px] font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed";
   const styles =
     variant === "primary"
-      ? "bg-[var(--warn)] text-[var(--line)] hover:-translate-y-0.5"
-      : "bg-[var(--panel)] text-[var(--text)] hover:-translate-y-0.5";
+      ? "bg-[var(--amber)] text-[var(--text)] hover:brightness-[0.97] shadow-[var(--shadow-sm)]"
+      : "border border-[var(--line)] bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--panel-2)]";
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`${base} ${styles}`}
-      style={{ boxShadow: disabled ? "none" : "var(--shadow-sm)" }}
-    >
+    <button onClick={onClick} disabled={disabled} className={`${base} ${styles}`}>
       {children}
     </button>
   );
@@ -169,11 +166,11 @@ export function Bar({
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
     <div
-      className="w-full overflow-hidden rounded-full border-2 border-[var(--line)] bg-[var(--panel-2)]"
+      className="w-full overflow-hidden rounded-full bg-[var(--panel-2)]"
       style={{ height }}
     >
       <div
-        className="h-full transition-all duration-200"
+        className="h-full rounded-full transition-all duration-200"
         style={{ width: `${pct}%`, background: color }}
       />
     </div>
@@ -182,8 +179,8 @@ export function Bar({
 
 export function Empty({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-[120px] flex-col items-center justify-center gap-2 text-center text-xs text-[var(--muted)]">
-      <span className="text-lg opacity-40" aria-hidden>
+    <div className="flex min-h-[120px] flex-col items-center justify-center gap-2 px-6 text-center text-[13px] text-[var(--muted)]">
+      <span className="doodle text-xl" aria-hidden>
         ✦
       </span>
       {children}
@@ -191,7 +188,27 @@ export function Empty({ children }: { children: ReactNode }) {
   );
 }
 
-/** Editorial page header: big display title + kicker. */
+/**
+ * Wraps the last word of a title in the hand-drawn ring, the way the
+ * reference does ("Improve your [Skills] Faster").
+ */
+function ringLastWord(title: string) {
+  const words = title.trim().split(" ");
+  if (words.length < 2) return <span className="circled">{title}</span>;
+  const last = words.pop()!;
+  // keep trailing punctuation outside the ring so the oval stays tight
+  const m = last.match(/^(.+?)([.?!,]*)$/);
+  const word = m ? m[1] : last;
+  const punct = m ? m[2] : "";
+  return (
+    <>
+      {words.join(" ")} <span className="circled">{word}</span>
+      {punct}
+    </>
+  );
+}
+
+/** Page opener: small kicker, then a headline with its last word circled. */
 export function PageHead({
   kicker,
   title,
@@ -202,35 +219,34 @@ export function PageHead({
   children?: ReactNode;
 }) {
   return (
-    <div className="mb-6">
-      <div className="section-label text-[var(--muted)]">{kicker}</div>
-      <h1 className="display mt-1.5 text-[clamp(28px,4.4vw,46px)] leading-[0.95]">
-        {title}
-      </h1>
+    <header className="mb-7">
+      <div className="section-label text-[var(--dim)]">{kicker}</div>
+      <h2 className="display mt-2 text-[clamp(26px,3.8vw,40px)] leading-[1.16]">
+        {ringLastWord(title)}
+      </h2>
       {children && (
-        <p className="mt-2.5 max-w-[70ch] text-[13px] leading-relaxed text-[var(--muted)]">
+        <p className="mt-3 max-w-[70ch] text-[14px] leading-relaxed text-[var(--muted)]">
           {children}
         </p>
       )}
-    </div>
+    </header>
   );
 }
 
-/** Small rotated sticker badge, for callouts. */
 export function Badge({
   children,
   tone = "accent",
-  rotate = -2,
 }: {
   children: ReactNode;
   tone?: keyof typeof TONES;
+  /** kept for API compatibility */
   rotate?: number;
 }) {
   const { fg, bg } = TONES[tone];
   return (
     <span
-      className="sticker inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.1em]"
-      style={{ background: bg, color: fg, transform: `rotate(${rotate}deg)` }}
+      className="inline-block rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.09em]"
+      style={{ background: bg, color: fg }}
     >
       {children}
     </span>

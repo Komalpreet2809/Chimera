@@ -1,50 +1,53 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Chimera — retro-editorial design system
-   Warm paper, forest ink, sticker cards, chunky display type.
-   The palette is earthy but the five semantic hues stay clearly
-   distinguishable, because they carry meaning in the data views
-   (prefill / decode / naive / paged / memory).
+   Chimera — warm modern design system
+   Amber hero, cream ground, white cards with soft shadows, and
+   the signature "circled word" headline treatment.
    ============================================================ */
 
 :root {
-  /* -- paper & ink -- */
-  --bg: #f2ede1; /* warm cream paper */
-  --panel: #ece5d6; /* card surface */
-  --panel-2: #e2d9c6; /* inset surface */
-  --line: #22271c; /* ink line — chunky, not hairline */
-  --line-soft: #c3b9a2; /* subtle divider */
-  --text: #22271c; /* forest near-black */
-  --muted: #5a6350;
-  --dim: #8a9179;
+  /* -- ground & surfaces -- */
+  --bg: #fdf7ee; /* warm cream */
+  --panel: #ffffff; /* white card */
+  --panel-2: #f7f0e4; /* inset / tinted surface */
+  --dark: #171716; /* dark feature section */
+  --line: #ece2d2; /* soft border */
+  --line-soft: #f2ebde;
 
-  /* -- brand: the logo badge. Kept in sync with app/icon.svg, which must
-        hardcode it (a favicon is loaded as an image and can't read page CSS). -- */
-  --brand: #e8a33d;
+  /* -- type -- */
+  --text: #1a1a18;
+  --muted: #6d675e;
+  --dim: #9c958a;
 
-  /* -- semantic accents (earthy, but distinct in hue) -- */
-  --accent: #2e6e8e; /* primary / cached */
-  --warn: #b87514; /* prefill */
-  --bad: #c4462f; /* naive / waste */
-  --good: #4e7a33; /* paged / accepted */
-  --violet: #6b4c9a; /* memory */
+  /* -- brand -- */
+  --amber: #f7a93b;
+  --amber-soft: #fcd9a0;
+  --brand: #f7a93b;
 
-  /* -- fills: lighter washes of the above, for large areas -- */
-  --accent-wash: #cfe0e9;
-  --warn-wash: #f0dcb8;
-  --bad-wash: #f0cec6;
-  --good-wash: #d5e3c7;
-  --violet-wash: #ddd2ec;
+  /* -- semantic hues: these encode meaning in the data views
+        (prefill / cached / naive / paged / memory), so they stay
+        clearly distinct even though the palette is warm. -- */
+  --accent: #2563eb; /* primary / cached */
+  --warn: #d97706; /* prefill */
+  --bad: #dc2626; /* naive / waste */
+  --good: #16a34a; /* paged / accepted */
+  --violet: #7c3aed; /* memory */
 
-  --shadow: 4px 4px 0 var(--line);
-  --shadow-sm: 2px 2px 0 var(--line);
-  --radius: 14px;
+  --accent-wash: #dbe7fe;
+  --warn-wash: #fdebd0;
+  --bad-wash: #fcdcdc;
+  --good-wash: #d6f0df;
+  --violet-wash: #e6dcfd;
+
+  --shadow-sm: 0 1px 2px rgba(26, 26, 24, 0.06), 0 2px 8px rgba(26, 26, 24, 0.04);
+  --shadow: 0 2px 6px rgba(26, 26, 24, 0.06), 0 12px 28px rgba(26, 26, 24, 0.07);
+  --radius: 18px;
 }
 
 @theme inline {
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, Menlo, Consolas, monospace;
 }
 
@@ -55,14 +58,8 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  /* faint paper grain so the cream reads as stock, not flat #fff */
-  background-image: radial-gradient(
-    var(--line-soft) 0.5px,
-    transparent 0.5px
-  );
-  background-size: 22px 22px;
 }
 
 .mono {
@@ -71,62 +68,92 @@ body {
 }
 
 .display {
-  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
-/* ---------- sticker card: chunky border + hard offset shadow ---------- */
+/* the italic serif used for accented words inside headlines */
+.accent-serif {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ---------- soft card ---------- */
 .panel {
   background: var(--panel);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 .sticker {
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  box-shadow: var(--shadow-sm);
   background: var(--panel);
+  box-shadow: var(--shadow-sm);
 }
 
-/* ---------- editorial section label: "+ SECTION" ---------- */
+/* ---------- section label ---------- */
 .section-label {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
 }
-.section-label::before {
-  content: "+";
-  margin-right: 0.4em;
-  opacity: 0.55;
+
+/* ---------- the signature: a hand-drawn ring around a word ----------
+   The lopsided border-radius plus a slight rotation is what stops it
+   reading as a plain pill and starts it reading as drawn by hand. */
+.circled {
+  position: relative;
+  display: inline-block;
+  padding: 0.04em 0.42em 0.1em;
+  white-space: nowrap;
+}
+.circled::before {
+  content: "";
+  position: absolute;
+  inset: -0.14em -0.1em -0.16em;
+  border: 2px solid var(--amber);
+  border-radius: 48% 52% 50% 50% / 58% 42% 56% 44%;
+  transform: rotate(-1.6deg);
+  pointer-events: none;
 }
 
-/* ---------- outline display type (the "PORT FOLIO" trick) ---------- */
-.outline {
-  color: transparent;
-  -webkit-text-stroke: 2px var(--line);
-  paint-order: stroke fill;
+/* solid variant — the black pill from the reference */
+.circled-solid {
+  display: inline-block;
+  padding: 0.02em 0.5em 0.12em;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--bg);
+  white-space: nowrap;
 }
 
-/* ---------- marquee ticker ---------- */
+/* ---------- doodle accents ---------- */
+.doodle {
+  color: var(--amber);
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- marquee ---------- */
 .marquee {
   display: flex;
   overflow: hidden;
   user-select: none;
-  gap: 0;
 }
 .marquee__track {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 2.5rem;
+  gap: 2.75rem;
   min-width: 100%;
-  padding-right: 2.5rem;
-  animation: scroll 38s linear infinite;
+  padding-right: 2.75rem;
+  animation: scroll 42s linear infinite;
 }
 @keyframes scroll {
   from {
@@ -143,15 +170,15 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--panel-2);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--dim);
+  background: #ddd4c6;
   border-radius: 999px;
-  border: 2px solid var(--panel-2);
+  border: 2px solid var(--bg);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: var(--dim);
 }
 
 @keyframes pop {
@@ -177,13 +204,9 @@ body {
   animation: spin-slow 9s linear infinite;
 }
 
-/* Respect users who don't want motion — the marquee and spinners are
-   decorative, so they simply stop. */
 @media (prefers-reduced-motion: reduce) {
   .marquee__track,
-  .spin-slow {
-    animation: none;
-  }
+  .spin-slow,
   .pop {
     animation: none;
   }

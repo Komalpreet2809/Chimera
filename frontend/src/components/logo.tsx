@@ -36,16 +36,14 @@ export function Logo({
       aria-label="Chimera"
     >
       <rect
-        x="1"
-        y="1"
-        width="30"
-        height="30"
-        rx="8"
-        fill="var(--brand, #e8a33d)"
-        stroke="var(--line, #22271c)"
-        strokeWidth="2"
+        x="0"
+        y="0"
+        width="32"
+        height="32"
+        rx="9"
+        fill="var(--text, #1a1a18)"
       />
-      <g fill="var(--line, #22271c)">
+      <g fill="var(--amber, #f7a93b)">
         {CELLS.map(([col, row], i) => (
           <rect
             key={`${col}-${row}`}
