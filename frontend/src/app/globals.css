@@ -1,50 +1,52 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Chimera — retro-editorial design system
-   Warm paper, forest ink, sticker cards, chunky display type.
-   The palette is earthy but the five semantic hues stay clearly
-   distinguishable, because they carry meaning in the data views
-   (prefill / decode / naive / paged / memory).
+   Chimera — old-magazine design system
+   Aged newsprint, printer's ink, hairline rules, drop caps.
+   Print convention: prose is set in serif, DATA is set in
+   tabular mono. That's how magazines actually did it, and it
+   keeps the charts legible.
    ============================================================ */
 
 :root {
-  /* -- paper & ink -- */
-  --bg: #f2ede1; /* warm cream paper */
-  --panel: #ece5d6; /* card surface */
-  --panel-2: #e2d9c6; /* inset surface */
-  --line: #22271c; /* ink line — chunky, not hairline */
-  --line-soft: #c3b9a2; /* subtle divider */
-  --text: #22271c; /* forest near-black */
-  --muted: #5a6350;
-  --dim: #8a9179;
+  /* -- stock & ink -- */
+  --bg: #ece5d4; /* aged newsprint */
+  --panel: #f2ecdd; /* a lighter sheet laid on top */
+  --panel-2: #e3dac6; /* inset / tint block */
+  --line: #201d18; /* printer's black, warm */
+  --line-soft: #b9ae95; /* hairline rule */
+  --text: #201d18;
+  --muted: #57503f;
+  --dim: #857c66;
 
   /* -- brand: the logo badge. Kept in sync with app/icon.svg, which must
         hardcode it (a favicon is loaded as an image and can't read page CSS). -- */
-  --brand: #e8a33d;
+  --brand: #d8bf88;
 
-  /* -- semantic accents (earthy, but distinct in hue) -- */
-  --accent: #2e6e8e; /* primary / cached */
-  --warn: #b87514; /* prefill */
-  --bad: #c4462f; /* naive / waste */
-  --good: #4e7a33; /* paged / accepted */
-  --violet: #6b4c9a; /* memory */
+  /* -- spot inks. Magazines ran black plus a couple of spot colours;
+        these stay distinct in hue because they encode meaning in the
+        data views (prefill / cached / naive / paged / memory). -- */
+  --accent: #2b5d7d; /* primary / cached */
+  --warn: #9a6410; /* prefill */
+  --bad: #a83526; /* naive / waste — the classic spot red */
+  --good: #47702f; /* paged / accepted */
+  --violet: #5d4384; /* memory */
 
-  /* -- fills: lighter washes of the above, for large areas -- */
-  --accent-wash: #cfe0e9;
-  --warn-wash: #f0dcb8;
-  --bad-wash: #f0cec6;
-  --good-wash: #d5e3c7;
-  --violet-wash: #ddd2ec;
+  /* -- tint blocks: screened washes of the inks -- */
+  --accent-wash: #cddae2;
+  --warn-wash: #ecdcbc;
+  --bad-wash: #eccdc6;
+  --good-wash: #d6e0c8;
+  --violet-wash: #d8d0e4;
 
-  --shadow: 4px 4px 0 var(--line);
+  --shadow: 3px 3px 0 var(--line);
   --shadow-sm: 2px 2px 0 var(--line);
-  --radius: 14px;
+  --radius: 2px; /* print has corners, not pills */
 }
 
 @theme inline {
-  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-garamond), Georgia, serif;
   --font-mono: var(--font-jetbrains), ui-monospace, Menlo, Consolas, monospace;
 }
 
@@ -55,69 +57,100 @@
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-garamond), Georgia, "Times New Roman", serif;
+  font-size: 17px; /* old-style serifs run small; compensate */
   -webkit-font-smoothing: antialiased;
-  /* faint paper grain so the cream reads as stock, not flat #fff */
-  background-image: radial-gradient(
-    var(--line-soft) 0.5px,
-    transparent 0.5px
-  );
-  background-size: 22px 22px;
+  /* newsprint halftone */
+  background-image: radial-gradient(var(--line-soft) 0.5px, transparent 0.6px);
+  background-size: 4px 4px;
 }
 
 .mono {
   font-family: var(--font-jetbrains), ui-monospace, Menlo, Consolas, monospace;
   font-variant-ligatures: none;
+  font-size: 0.82em; /* mono runs large next to a serif */
 }
 
 .display {
-  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-weight: 900;
+  letter-spacing: -0.015em;
 }
 
-/* ---------- sticker card: chunky border + hard offset shadow ---------- */
+.serif {
+  font-family: var(--font-garamond), Georgia, serif;
+}
+
+/* ---------- rules: the magazine's structural element ---------- */
+.rule {
+  border-top: 1px solid var(--line);
+}
+.rule-thick {
+  border-top: 3px solid var(--line);
+}
+/* the classic thick-over-thin double rule under a masthead */
+.rule-double {
+  border-top: 3px solid var(--line);
+  box-shadow: 0 2px 0 var(--line);
+}
+
+/* ---------- boxed article / sidebar ---------- */
 .panel {
   background: var(--panel);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+}
+.panel-feature {
+  border-width: 3px;
 }
 
 .sticker {
-  border: 2px solid var(--line);
-  border-radius: 999px;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
   background: var(--panel);
 }
 
-/* ---------- editorial section label: "+ SECTION" ---------- */
+/* ---------- section label: letterspaced small caps ---------- */
 .section-label {
-  font-family: var(--font-space-grotesk), sans-serif;
+  font-family: var(--font-jetbrains), monospace;
   font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.14em;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
-.section-label::before {
-  content: "+";
-  margin-right: 0.4em;
-  opacity: 0.55;
+
+/* ---------- drop cap for the opening paragraph ---------- */
+.dropcap::first-letter {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-weight: 900;
+  float: left;
+  font-size: 3.1em;
+  line-height: 0.82;
+  padding: 0.04em 0.1em 0 0;
+  color: var(--line);
 }
 
-/* ---------- outline display type (the "PORT FOLIO" trick) ---------- */
+/* ---------- folio / running head furniture ---------- */
+.folio {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- outline display type ---------- */
 .outline {
   color: transparent;
-  -webkit-text-stroke: 2px var(--line);
+  -webkit-text-stroke: 1.5px var(--line);
   paint-order: stroke fill;
 }
 
-/* ---------- marquee ticker ---------- */
+/* ---------- marquee, set as a wire-service ticker ---------- */
 .marquee {
   display: flex;
   overflow: hidden;
   user-select: none;
-  gap: 0;
 }
 .marquee__track {
   display: flex;
@@ -126,7 +159,7 @@ body {
   gap: 2.5rem;
   min-width: 100%;
   padding-right: 2.5rem;
-  animation: scroll 38s linear infinite;
+  animation: scroll 44s linear infinite;
 }
 @keyframes scroll {
   from {
@@ -139,16 +172,16 @@ body {
 
 /* ---------- misc ---------- */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
   background: var(--panel-2);
+  border-left: 1px solid var(--line-soft);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--dim);
-  border-radius: 999px;
-  border: 2px solid var(--panel-2);
+  border: 3px solid var(--panel-2);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
@@ -177,13 +210,9 @@ body {
   animation: spin-slow 9s linear infinite;
 }
 
-/* Respect users who don't want motion — the marquee and spinners are
-   decorative, so they simply stop. */
 @media (prefers-reduced-motion: reduce) {
   .marquee__track,
-  .spin-slow {
-    animation: none;
-  }
+  .spin-slow,
   .pop {
     animation: none;
   }

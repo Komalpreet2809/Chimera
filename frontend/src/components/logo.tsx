@@ -53,7 +53,7 @@ export function Logo({
             y={5 + row * 8}
             width="6"
             height="6"
-            rx="1.5"
+            rx="1"
           >
             {animate && (
               <animate

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { EB_Garamond, JetBrains_Mono, Playfair_Display } from "next/font/google";
 import Link from "next/link";
-import { Wordmark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-playfair",
 });
-const spaceGrotesk = Space_Grotesk({
+const garamond = EB_Garamond({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-garamond",
 });
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
@@ -31,8 +31,7 @@ const NAV = [
   { href: "/benchmarks", label: "Benchmarks", n: "05" },
 ];
 
-/* The ticker carries the project's real measured results — decoration that
-   happens to be the headline evidence. */
+/* Set as a wire-service ticker — decoration that happens to be the evidence. */
 const TICKER = [
   "GPT-2 BUILT FROM SCRATCH",
   "5e-5 LOGIT ACCURACY",
@@ -50,19 +49,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${spaceGrotesk.variable} ${jetbrains.variable}`}
+      className={`${playfair.variable} ${garamond.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-screen">
-        {/* ---- top marquee ---- */}
-        <div className="marquee border-b-2 border-[var(--line)] bg-[var(--line)] py-1.5 text-[var(--bg)]">
+        {/* ---- wire ticker ---- */}
+        <div className="marquee border-b border-[var(--line)] bg-[var(--line)] py-1 text-[var(--bg)]">
           {[0, 1].map((dup) => (
             <div className="marquee__track" key={dup} aria-hidden={dup === 1}>
               {TICKER.map((t, i) => (
                 <span
                   key={i}
-                  className="mono flex items-center gap-2.5 whitespace-nowrap text-[10px] font-medium tracking-[0.12em]"
+                  className="mono flex items-center gap-2.5 whitespace-nowrap text-[9px] tracking-[0.2em]"
                 >
-                  <span aria-hidden>✦</span>
+                  <span aria-hidden>❖</span>
                   {t}
                 </span>
               ))}
@@ -70,46 +69,80 @@ export default function RootLayout({
           ))}
         </div>
 
-        {/* ---- header ---- */}
-        <header className="sticky top-0 z-50 border-b-2 border-[var(--line)] bg-[var(--bg)]/92 backdrop-blur">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
-            <Link href="/" aria-label="Chimera — home">
-              <Wordmark animate />
-            </Link>
+        {/* ---- masthead ---- */}
+        <div className="border-b border-[var(--line-soft)] bg-[var(--panel)]">
+          <div className="mx-auto max-w-[1400px] px-6">
+            {/* running head */}
+            <div className="flex items-center justify-between gap-4 py-1.5">
+              <span className="folio">Vol. I · No. 1</span>
+              <span className="folio hidden sm:block">
+                An Illustrated Guide to Machine Inference
+              </span>
+              <span className="folio">Est. 2026</span>
+            </div>
 
-            <nav className="ml-auto flex flex-wrap items-center gap-1.5">
-              {NAV.map((n) => (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className="group flex items-center gap-1.5 whitespace-nowrap rounded-full border-2 border-transparent px-3 py-1.5 text-xs font-semibold text-[var(--muted)] transition-all hover:border-[var(--line)] hover:bg-[var(--panel)] hover:text-[var(--text)]"
-                >
-                  <span className="mono text-[9px] opacity-50">{n.n}</span>
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
+            <div className="rule" />
+
+            {/* the masthead proper */}
+            <Link href="/" aria-label="Chimera — home" className="block">
+              <div className="flex items-center justify-center gap-5 py-5">
+                <Logo size={44} animate className="hidden shrink-0 sm:block" />
+                <h1 className="display text-center text-[clamp(38px,8vw,84px)] leading-[0.86] tracking-[0.01em]">
+                  Chimera
+                </h1>
+                <Logo size={44} animate className="hidden shrink-0 sm:block" />
+              </div>
+              <p className="serif -mt-1 pb-4 text-center text-[13px] italic tracking-wide text-[var(--muted)]">
+                LLM inference, made visible — an engine built from first
+                principles, and the instruments to watch it run
+              </p>
+            </Link>
           </div>
-        </header>
+        </div>
+
+        {/* ---- contents bar ---- */}
+        <nav className="rule-double sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--bg)]/95 backdrop-blur">
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-stretch justify-center divide-x divide-[var(--line-soft)] px-6">
+            {NAV.map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                className="group flex items-baseline gap-2 px-4 py-2.5 transition-colors hover:bg-[var(--panel-2)]"
+              >
+                <span className="mono text-[9px] tracking-[0.15em] text-[var(--dim)]">
+                  {n.n}
+                </span>
+                <span className="serif text-[15px] text-[var(--text)] group-hover:italic">
+                  {n.label}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </nav>
 
         <main className="mx-auto max-w-[1400px] px-6 py-8">{children}</main>
 
-        <footer className="mt-12 border-t-2 border-[var(--line)] bg-[var(--panel)]">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-4 px-6 py-6">
-            <div className="display text-[13px] tracking-wide">
-              CHIMERA <span className="opacity-40">✦</span>{" "}
-              <span className="font-normal opacity-60">
-                an LLM inference engine you can watch
-              </span>
+        <footer className="mt-14 border-t border-[var(--line)] bg-[var(--panel)]">
+          <div className="mx-auto max-w-[1400px] px-6 py-7">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="serif text-[14px] italic text-[var(--muted)]">
+                Printed from a GPT-2 written by hand, in{" "}
+                <span className="not-italic">PyTorch</span>.
+              </div>
+              <a
+                href="https://github.com/Komalpreet2809/Chimera"
+                target="_blank"
+                rel="noreferrer"
+                className="sticker px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors hover:bg-[var(--panel-2)]"
+              >
+                Source ↗
+              </a>
             </div>
-            <a
-              href="https://github.com/Komalpreet2809/Chimera"
-              target="_blank"
-              rel="noreferrer"
-              className="sticker px-4 py-1.5 text-[11px] font-bold tracking-wide transition-transform hover:-translate-y-0.5"
-            >
-              SOURCE ↗
-            </a>
+            <div className="rule mt-5 pt-3">
+              <p className="folio text-center">
+                Chimera · An Illustrated Guide to Machine Inference · Vol. I
+              </p>
+            </div>
           </div>
         </footer>
       </body>
