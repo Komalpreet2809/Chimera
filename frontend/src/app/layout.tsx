@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Serif, JetBrains_Mono, Poppins } from "next/font/google";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
+import { Nav } from "@/components/nav";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,14 +26,6 @@ export const metadata: Metadata = {
   description:
     "An interactive LLM inference engine: watch KV cache, continuous batching, PagedAttention and speculative decoding actually happen.",
 };
-
-const NAV = [
-  { href: "/", label: "Inference Lab" },
-  { href: "/scheduler", label: "Scheduler" },
-  { href: "/memory", label: "Paged Memory" },
-  { href: "/attention", label: "Attention" },
-  { href: "/benchmarks", label: "Benchmarks" },
-];
 
 /* The headline numbers, all measured — see the Benchmarks page. */
 const STATS = [
@@ -89,17 +82,7 @@ export default function RootLayout({
               </span>
             </Link>
 
-            <nav className="flex flex-wrap items-center gap-1">
-              {NAV.map((n) => (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium text-[var(--text)]/75 transition-colors hover:bg-[#1a1a18]/10 hover:text-[var(--text)]"
-                >
-                  {n.label}
-                </Link>
-              ))}
-            </nav>
+            <Nav />
 
             <a
               href="https://github.com/Komalpreet2809/Chimera"
