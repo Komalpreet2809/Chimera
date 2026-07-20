@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import Link from "next/link";
+import { Wordmark } from "@/components/logo";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -72,21 +73,8 @@ export default function RootLayout({
         {/* ---- header ---- */}
         <header className="sticky top-0 z-50 border-b-2 border-[var(--line)] bg-[var(--bg)]/92 backdrop-blur">
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-3">
-            <Link href="/" className="group flex shrink-0 items-center gap-3">
-              <div
-                className="grid h-9 w-9 place-items-center rounded-full border-2 border-[var(--line)] bg-[var(--warn)] text-[15px] font-black text-[var(--line)]"
-                style={{ boxShadow: "var(--shadow-sm)" }}
-              >
-                C
-              </div>
-              <div className="leading-none">
-                <div className="display text-[19px] tracking-tight">
-                  CHIMERA
-                </div>
-                <div className="mt-1 text-[10px] tracking-[0.1em] text-[var(--muted)] uppercase">
-                  LLM inference, made visible
-                </div>
-              </div>
+            <Link href="/" aria-label="Chimera — home">
+              <Wordmark animate />
             </Link>
 
             <nav className="ml-auto flex flex-wrap items-center gap-1.5">

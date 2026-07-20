@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Chimera mark: the causal-attention staircase, drawn as paged KV blocks.
+       Row i may attend to columns 0..i — the lower-triangular mask that makes
+       left-to-right generation possible, and the same grid PagedAttention
+       hands out in fixed-size blocks. -->
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="#e8a33d" stroke="#22271c" stroke-width="2"/>
+  <g fill="#22271c">
+    <!-- row 0: sees itself -->
+    <rect x="5" y="5" width="6" height="6" rx="1.5"/>
+    <!-- row 1: sees 0,1 -->
+    <rect x="5" y="13" width="6" height="6" rx="1.5"/>
+    <rect x="13" y="13" width="6" height="6" rx="1.5"/>
+    <!-- row 2: sees 0,1,2 -->
+    <rect x="5" y="21" width="6" height="6" rx="1.5"/>
+    <rect x="13" y="21" width="6" height="6" rx="1.5"/>
+    <rect x="21" y="21" width="6" height="6" rx="1.5"/>
+  </g>
+</svg>
