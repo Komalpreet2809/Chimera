@@ -40,8 +40,17 @@
   --good-wash: #d6f0df;
   --violet-wash: #e6dcfd;
 
-  --shadow-sm: 0 1px 2px rgba(26, 26, 24, 0.06), 0 2px 8px rgba(26, 26, 24, 0.04);
-  --shadow: 0 2px 6px rgba(26, 26, 24, 0.06), 0 12px 28px rgba(26, 26, 24, 0.07);
+  /* tinted card surfaces (control bars) */
+  --amber-tint: #fef4e4;
+  --amber-line: #f5dcb2;
+
+  /* ghost fill for skeleton/empty states */
+  --ghost: #ece2d2;
+
+  /* Cards sit on cream, so they need a touch more lift than they would on
+     white — otherwise the whole page flattens into one plane. */
+  --shadow-sm: 0 1px 2px rgba(26, 26, 24, 0.05), 0 4px 14px rgba(26, 26, 24, 0.06);
+  --shadow: 0 2px 6px rgba(26, 26, 24, 0.08), 0 14px 34px rgba(26, 26, 24, 0.1);
   --radius: 18px;
 }
 

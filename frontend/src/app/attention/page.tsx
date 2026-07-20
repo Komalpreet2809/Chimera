@@ -172,7 +172,7 @@ export default function AttentionPage() {
         </div>
       </Panel>
 
-      <Panel title="What am I looking at?">
+      <Panel title="What am I looking at?" tone="dark">
         <p className="text-xs leading-relaxed text-[var(--muted)]">
           Each of the {(data?.n_layer ?? 12) * (data?.n_head ?? 12)} heads specialises.
           Some track syntax (which verb belongs to which subject), some resolve pronouns,

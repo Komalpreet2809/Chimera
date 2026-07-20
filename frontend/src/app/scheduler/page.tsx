@@ -89,7 +89,7 @@ export default function SchedulerPage() {
           refilled from the queue on the very next step.
       </PageHead>
 
-      <Panel>
+      <Panel tone="amber">
         <div className="flex flex-wrap items-end gap-5">
           <div className="flex gap-1.5">
             {POLICIES.map((p) => (
@@ -172,7 +172,7 @@ export default function SchedulerPage() {
           subtitle="each slot is a request riding this forward pass"
         >
           {!tick ? (
-            <Empty>Run the simulation to watch the batch fill.</Empty>
+            <Empty shape="grid">Run the simulation to watch the batch fill.</Empty>
           ) : (
             <div className="space-y-3">
               <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(capacity, 4)}, minmax(0,1fr))` }}>

@@ -80,7 +80,7 @@ export default function InferenceLab() {
         costs to recompute the entire sequence on every single step.
       </PageHead>
 
-      <Panel>
+      <Panel tone="amber">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
           <div className="space-y-3">
             <textarea
@@ -179,7 +179,7 @@ export default function InferenceLab() {
           subtitle="one bar per token — height is the real latency of that forward pass"
         >
           {tokens.length === 0 ? (
-            <Empty>Press Generate to watch tokens arrive, one forward pass at a time.</Empty>
+            <Empty shape="bars">Press Generate to watch tokens arrive, one forward pass at a time.</Empty>
           ) : (
             <div className="space-y-4">
               <div className="flex h-[140px] items-end gap-[3px] overflow-x-auto pb-1">
@@ -223,7 +223,7 @@ export default function InferenceLab() {
 
         <Panel title="Output" subtitle="prompt in grey, generated tokens in white">
           {promptTokens.length === 0 && tokens.length === 0 ? (
-            <Empty>No output yet.</Empty>
+            <Empty shape="rows">No output yet.</Empty>
           ) : (
             <div className="mono max-h-[190px] overflow-y-auto text-[13px] leading-relaxed">
               {promptTokens.map((t, i) => (

@@ -47,7 +47,7 @@ export default function MemoryPage() {
           the moment a request finishes.
       </PageHead>
 
-      <Panel>
+      <Panel tone="amber">
         <div className="flex flex-wrap items-center gap-6">
           {[
             { label: "KV budget", value: budget, set: setBudget, min: 128, max: 2048, step: 128, unit: "MB" },
@@ -138,7 +138,7 @@ export default function MemoryPage() {
             />
           </div>
 
-          <Panel title="Why this works">
+          <Panel title="Why this works" tone="dark">
             <p className="text-xs leading-relaxed text-[var(--muted)]">
               The naive engine wastes{" "}
               <span className="mono text-[var(--bad)]">

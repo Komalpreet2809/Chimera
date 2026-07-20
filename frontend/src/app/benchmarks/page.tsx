@@ -52,7 +52,7 @@ export default function BenchmarksPage() {
           </div>
         )}
         {!data ? (
-          <Empty>
+          <Empty shape="bars">
             {loading
               ? "Running real forward passes…"
               : "Press Run to benchmark the engine live."}
