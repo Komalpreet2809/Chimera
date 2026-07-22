@@ -92,6 +92,13 @@
   --amber-tint: #fef4e4;
   --amber-line: #f5dcb2;
 
+  /* Text on the dark panels. The normal scale is built for cream, so using
+     --text or --muted there ranges from low-contrast to literally invisible
+     (--text #1a1a18 on --dark #171716 is ~1:1). */
+  --on-dark: #f6f1e8;
+  --on-dark-muted: rgba(246, 241, 232, 0.72);
+  --on-dark-accent: var(--amber-6);
+
   /* Cards sit on cream, so they need a touch more lift than they would on
      white — otherwise the whole page flattens into one plane. */
   --shadow-sm: 0 1px 2px rgba(26, 26, 24, 0.05), 0 4px 14px rgba(26, 26, 24, 0.06);
@@ -292,7 +299,9 @@ body {
   transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
 }
 .runtime-token:hover { transform: translateY(-2px); border-color: var(--dim); }
-.runtime-token.is-selected { border-color: var(--bad); background: var(--bad-wash); box-shadow: 0 4px 14px rgba(109,46,28,.12); }
+/* Selection is attention, not failure — these were all set in the negative
+   ink, so inspecting a perfectly healthy token made it look like an error. */
+.runtime-token.is-selected { border-color: var(--amber-4); background: var(--amber-tint); box-shadow: 0 4px 14px rgba(196,131,26,.16); }
 .runtime-token.is-selected::after {
   content: ""; position: absolute; left: 50%; bottom: -17px; height: 16px;
   border-left: 1px dashed var(--bad); transform: translateX(-50%);
@@ -319,8 +328,12 @@ body {
 .debugger-subhead b { color: var(--text); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
 .output-trace { max-height: 144px; margin-top: 16px; overflow-y: auto; font-size: 12px; line-height: 1.9; }
 .prompt-trace { color: var(--dim); }
-.output-trace button { border-radius: 4px; padding: 1px 0; }
-.output-trace button:hover, .output-trace button.is-selected { background: var(--bad-wash); color: var(--bad); outline: 1px solid color-mix(in srgb, var(--bad) 28%, transparent); }
+/* GPT-2 tokens carry their own leading space (" that", " when"). Inline
+   elements collapse whitespace at their boundaries, which ran the whole
+   output together as "isthatwhenyoudo" — pre keeps the spaces the model
+   actually emitted. */
+.output-trace button { border-radius: 4px; padding: 1px 0; white-space: pre; }
+.output-trace button:hover, .output-trace button.is-selected { background: var(--amber-tint); color: var(--amber-1); outline: 1px solid var(--amber-4); }
 .trace-cursor { display: inline-block; width: 2px; height: 14px; margin-left: 2px; background: var(--amber); animation: pulse 800ms infinite; vertical-align: middle; }
 @keyframes pulse { 50% { opacity: .2; } }
 .snapshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
@@ -333,7 +346,7 @@ a.snapshot-card:hover { transform: translateY(-1px); border-color: var(--accent)
 .log-head { margin-top: 16px; padding: 0 2px 8px; }
 .engine-log { max-height: 176px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: #fbf8f2; font-size: 9px; }
 .engine-log > div, .engine-log-seed { display: grid; grid-template-columns: 74px 132px 1fr; gap: 10px; padding: 6px 9px; border-bottom: 1px solid var(--line-soft); }
-.engine-log > div.is-current { background: var(--bad-wash); color: var(--bad); }
+.engine-log > div.is-current { background: var(--amber-tint); color: var(--amber-1); }
 .engine-log b { font-weight: 600; }
 .engine-log span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .guided-replay { margin-top: 12px; border: 1px solid var(--amber-line); border-radius: 12px; background: var(--amber-tint); padding: 10px 12px; }
@@ -345,7 +358,7 @@ a.snapshot-card:hover { transform: translateY(-1px); border-color: var(--accent)
 .replay-controls strong { font-size: 10px; }
 .replay-controls span { margin-top: 2px; color: var(--muted); font-size: 9px; }
 .token-inspector, .inspector-empty { border-left: 1px solid var(--line); background: #fbf8f2; padding: 22px 18px; }
-.inspector-token { margin: 14px 0 18px; color: var(--bad); font-size: 25px; word-break: break-word; }
+.inspector-token { margin: 14px 0 18px; color: var(--text); font-size: 25px; word-break: break-word; }
 .token-inspector dl > div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line-soft); padding: 9px 0; font-size: 10px; }
 .token-inspector dt { color: var(--muted); }
 .token-inspector dd { font-family: var(--font-jetbrains); text-align: right; }

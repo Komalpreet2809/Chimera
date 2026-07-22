@@ -241,12 +241,13 @@ export default function AttentionPage() {
       </Panel>
 
       <Panel title="What am I looking at?" tone="dark">
-        <p className="text-xs leading-relaxed text-[var(--muted)]">
-          Each of the {(data?.n_layer ?? 12) * (data?.n_head ?? 12)} heads specialises.
+        <p className="text-xs leading-relaxed text-[var(--on-dark-muted)]">
+          Each of the {(data?.n_layer ?? 12) * (data?.n_head ?? 12)}{" "}
+          heads specialises.
           Some track syntax (which verb belongs to which subject), some resolve pronouns,
           some just look at the previous token. Many heads — especially in early layers —
           dump most of their weight on the very first token: that&apos;s a real, documented
-          phenomenon called an <span className="text-[var(--text)]">attention sink</span>,
+          phenomenon called an <span className="text-[var(--on-dark)]">attention sink</span>,
           the model&apos;s way of saying &ldquo;nothing here is relevant to me,&rdquo;
           parking its attention somewhere harmless rather than being forced to pull in
           noise. Browse the layers and you can watch heads go from mechanical

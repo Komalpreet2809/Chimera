@@ -130,7 +130,6 @@ export default function MemoryPage() {
               totalMb={data.naive.reserved_mb}
               budget={data.budget_mb}
               waste={data.naive.waste}
-              tone="bad"
               selectedBlock={undefined}
             />
             <MemoryMap
@@ -141,25 +140,24 @@ export default function MemoryPage() {
               totalMb={data.paged.allocated_mb}
               budget={data.budget_mb}
               waste={data.paged.waste}
-              tone="good"
               selectedBlock={selectedBlock}
             />
           </div>
 
           <Panel title="Why this works" tone="dark">
-            <p className="text-xs leading-relaxed text-[var(--muted)]">
+            <p className="text-xs leading-relaxed text-[var(--on-dark-muted)]">
               The naive engine wastes{" "}
-              <span className="mono text-[var(--bad)]">
+              <span className="mono text-[var(--rust-5)]">
                 {(data.naive.waste * 100).toFixed(0)}%
               </span>{" "}
               of its memory on space it reserved but never touched — so only{" "}
-              <span className="mono text-[var(--text)]">{data.naive.fit}</span> users fit
+              <span className="mono text-[var(--on-dark)]">{data.naive.fit}</span> users fit
               in {data.budget_mb} MB. Paging cuts that waste to{" "}
-              <span className="mono text-[var(--good)]">
+              <span className="mono text-[var(--on-dark-accent)]">
                 {(data.paged.waste * 100).toFixed(1)}%
               </span>{" "}
               (just the unfilled tail of each request&apos;s last block), fitting{" "}
-              <span className="mono text-[var(--good)]">{data.paged.fit}</span> users in
+              <span className="mono text-[var(--on-dark-accent)]">{data.paged.fit}</span> users in
               the exact same memory. Nothing about the model changed — only how its
               memory is handed out. Shrink the block size and waste falls further, at the
               cost of a longer block table per request.
@@ -179,7 +177,6 @@ function MemoryMap({
   totalMb,
   budget,
   waste,
-  tone,
   selectedBlock,
 }: {
   title: string;
@@ -189,15 +186,17 @@ function MemoryMap({
   totalMb: number;
   budget: number;
   waste: number;
-  tone: "good" | "bad";
   selectedBlock?: number;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const CELLS = 240;
   const usedCells = Math.round((usedMb / budget) * CELLS);
   const wastedCells = Math.round(((totalMb - usedMb) / budget) * CELLS);
-  // Chart marks carry no text, so they take the brighter fill steps.
-  const color = tone === "good" ? "var(--good-fill)" : "var(--accent-fill)";
+  // Both panels plot the SAME quantity — real KV data — so both must draw it
+  // in the same ink. Colouring naive black and paged amber made one chart look
+  // like it measured something different, when the entire point is that the
+  // data is identical and only the surrounding waste changes.
+  const color = "var(--good-fill)";
   const inspected = hovered ?? (selectedBlock === undefined ? null : Math.abs(selectedBlock) % CELLS);
   const inspectedKind = inspected === null ? null : inspected < usedCells ? "active" : inspected < usedCells + wastedCells ? "reserved" : "free";
   const owner = inspected === null || inspectedKind === "free" ? null : (inspected % Math.max(1, fit)) + 1;

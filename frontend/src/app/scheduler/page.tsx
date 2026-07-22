@@ -322,7 +322,7 @@ export default function SchedulerPage() {
                 ))}
               </div>
               <p className="mt-3 text-[10px] leading-snug text-[var(--dim)]">
-                Red bars are wasted GPU capacity — seats sitting empty because a policy
+                Grey bars are wasted GPU capacity — seats sitting empty because a policy
                 won&apos;t let a queued request take them.
               </p>
             </>
