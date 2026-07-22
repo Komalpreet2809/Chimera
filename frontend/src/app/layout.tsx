@@ -3,6 +3,8 @@ import { Instrument_Serif, JetBrains_Mono, Poppins } from "next/font/google";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { Nav } from "@/components/nav";
+import { RuntimeProvider } from "@/components/runtime";
+import { RuntimeDock } from "@/components/runtime-debugger";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -44,6 +46,7 @@ export default function RootLayout({
       className={`${poppins.variable} ${instrument.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-screen">
+        <RuntimeProvider>
         {/* ---- amber hero band ---- */}
         <div className="relative overflow-hidden bg-[var(--amber)]">
           {/* doodles */}
@@ -124,6 +127,7 @@ export default function RootLayout({
           </div>
         </div>
 
+        <div className="mx-auto max-w-[1400px] px-6"><RuntimeDock /></div>
         <main className="mx-auto max-w-[1400px] px-6 py-9">{children}</main>
 
         <footer className="mt-14 bg-[var(--dark)] text-[#f6f1e8]">
@@ -148,6 +152,7 @@ export default function RootLayout({
             </a>
           </div>
         </footer>
+        </RuntimeProvider>
       </body>
     </html>
   );

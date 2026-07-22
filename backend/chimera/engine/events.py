@@ -22,4 +22,5 @@ class StepEvent:
     cache_tokens: int          # tokens held in this request's KV cache
     cache_bytes: int           # cache memory footprint right now (Bite 4 live)
     num_generated: int         # total tokens produced for this request so far
+    probability: float = 0.0   # probability assigned to the sampled token
     timestamp: float = field(default_factory=time.perf_counter)

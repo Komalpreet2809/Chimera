@@ -15,6 +15,7 @@ from __future__ import annotations
 import time
 
 import torch
+import torch.nn.functional as F
 
 from ..model.generate import SampleConfig, _pick_next
 from ..model.gpt import GPT
@@ -23,6 +24,18 @@ from .events import StepEvent
 from .request import FinishReason, Request, RequestState
 
 GPT2_EOS = 50256  # GPT-2's end-of-text token id
+
+
+def _chosen_probability(logits: torch.Tensor, token_id: int, cfg: SampleConfig) -> float:
+    """Probability of the chosen token under the exact decoding distribution."""
+    if cfg.greedy:
+        return float(F.softmax(logits, dim=-1)[token_id].item())
+    scaled = logits / max(cfg.temperature, 1e-6)
+    if cfg.top_k is not None:
+        k = min(cfg.top_k, scaled.size(-1))
+        cutoff = torch.topk(scaled, k).values[-1]
+        scaled = scaled.masked_fill(scaled < cutoff, float("-inf"))
+    return float(F.softmax(scaled, dim=-1)[token_id].item())
 
 
 class InferenceEngine:
@@ -81,6 +94,7 @@ class InferenceEngine:
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
         next_id = _pick_next(logits[0, -1], self.sample_cfg)
+        probability = _chosen_probability(logits[0, -1], next_id, self.sample_cfg)
         req.generated_ids.append(next_id)
         req.state = RequestState.DECODING
 
@@ -103,6 +117,7 @@ class InferenceEngine:
             cache_tokens=cache_tokens,
             cache_bytes=cache_bytes,
             num_generated=req.num_generated,
+            probability=probability,
         )
 
     # ---- the batched operation (Phase 4) ----
@@ -138,6 +153,7 @@ class InferenceEngine:
         events = []
         for i, req in enumerate(reqs):
             next_id = _pick_next(logits[i, -1], self.sample_cfg)
+            probability = _chosen_probability(logits[i, -1], next_id, self.sample_cfg)
             req.generated_ids.append(next_id)
 
             cache_tokens = req.kv_cache.seq_len
@@ -157,6 +173,7 @@ class InferenceEngine:
                     cache_tokens=cache_tokens,
                     cache_bytes=cache_bytes,
                     num_generated=req.num_generated,
+                    probability=probability,
                 )
             )
         return events

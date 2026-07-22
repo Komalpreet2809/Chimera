@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Empty, PageHead, Panel } from "@/components/ui";
 import { API_BASE, AttentionResp, post } from "@/lib/api";
+import { useRuntime } from "@/components/runtime";
 
 /**
  * Sequential ramp for the heatmap, built from the brand ramps.
@@ -44,8 +45,10 @@ function isDark(v: number): boolean {
 }
 
 export default function AttentionPage() {
-  const [text, setText] = useState(
-    "The animal didn't cross the street because it was too tired"
+  const runtime = useRuntime();
+  const [text, setText] = useState(() => runtime.tokens.length
+    ? runtime.prompt + runtime.tokens.slice(0, runtime.selected + 1).map((token) => token.token).join("")
+    : "The animal didn't cross the street because it was too tired"
   );
   const [layer, setLayer] = useState(0);
   const [head, setHead] = useState(0);
@@ -67,7 +70,9 @@ export default function AttentionPage() {
   }, [text, layer, head]);
 
   useEffect(() => {
-    run();
+    const timer = window.setTimeout(run, 0);
+    return () => window.clearTimeout(timer);
+    // Analyze is explicit for text edits; only layer/head browsing auto-runs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layer, head]);
 
@@ -140,6 +145,7 @@ export default function AttentionPage() {
         title={`Attention weights — layer ${layer}, head ${head}`}
         subtitle="brighter = more attention. Row = who's asking, column = who's being looked at."
       >
+        {data ? <AttentionArcs data={data} target={data.tokens.length - 1} /> : null}
         {!data ? (
           <Empty>Loading…</Empty>
         ) : (
@@ -247,6 +253,42 @@ export default function AttentionPage() {
           (position-based) to semantic (meaning-based).
         </p>
       </Panel>
+    </div>
+  );
+}
+
+function AttentionArcs({ data, target }: { data: AttentionResp; target: number }) {
+  const [source, setSource] = useState<number | null>(null);
+  const width = Math.max(720, data.tokens.length * 58);
+  const row = data.attention[Math.max(0, Math.min(target, data.attention.length - 1))] ?? [];
+  const step = width / Math.max(1, data.tokens.length);
+  const x = (index: number) => step * index + step / 2;
+  return (
+    <div className="attention-arcs-wrap">
+      <div className="debugger-subhead"><b>Causal attention arcs</b><span>thickness and opacity encode weight · hover a source token</span></div>
+      <div className="attention-arcs-scroll">
+        <div className="attention-arcs" style={{ width }}>
+          <svg viewBox={`0 0 ${width} 180`} preserveAspectRatio="none" aria-label="Attention connections">
+            {row.slice(0, target + 1).map((weight, index) => {
+              if (weight < 0.01) return null;
+              const startX = x(index);
+              const endX = x(target);
+              const lift = Math.max(18, Math.abs(endX - startX) * 0.32);
+              return <path key={index} d={`M ${startX} 170 Q ${(startX + endX) / 2} ${170 - lift} ${endX} 170`}
+                className={source === null || source === index ? "is-visible" : ""}
+                style={{ strokeWidth: Math.max(1, weight * 16), opacity: Math.max(.12, weight) }} />;
+            })}
+          </svg>
+          <div className="attention-arc-tokens">
+            {data.tokens.map((token, index) => (
+              <button key={index} onMouseEnter={() => setSource(index)} onMouseLeave={() => setSource(null)}
+                className={index === target ? "is-target" : source === index ? "is-source" : ""}>
+                <span className="mono">{index}</span><b className="mono">{token.text.trim() || "␣"}</b>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

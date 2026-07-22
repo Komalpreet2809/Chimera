@@ -13,6 +13,7 @@ export type TokenMsg = {
   cache_tokens: number;
   cache_bytes: number;
   index: number;
+  probability: number;
   blocks: number[] | null;
 };
 

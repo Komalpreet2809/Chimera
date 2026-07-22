@@ -147,6 +147,7 @@ async def ws_generate(ws: WebSocket) -> None:
                     "cache_tokens": ev.cache_tokens,
                     "cache_bytes": ev.cache_bytes,
                     "index": ev.num_generated,
+                    "probability": round(ev.probability, 6),
                     "blocks": (
                         list(req.kv_cache.table.physical_blocks)
                         if paged and req.kv_cache is not None
@@ -183,17 +184,21 @@ async def _stream_uncached(ws, prompt, max_new, greedy, temperature, metrics) ->
             torch.cuda.synchronize()
         latency = (time.perf_counter() - t0) * 1000
         nxt = _pick_next(logits[0, -1], cfg)
+        from ..engine.engine import _chosen_probability
+        probability = _chosen_probability(logits[0, -1], nxt, cfg)
         ids = torch.cat([ids, torch.tensor([[nxt]], device=device)], dim=1)
 
         ev = StepEvent(
             request_id=0, kind="decode", token_id=nxt, token_text=tok.decode([nxt]),
             latency_ms=latency, cache_tokens=0, cache_bytes=0, num_generated=i + 1,
+            probability=probability,
         )
         metrics.on_event(ev)
         await ws.send_json({
             "type": "token", "kind": "decode", "token": ev.token_text,
             "token_id": nxt, "latency_ms": round(latency, 2),
-            "cache_tokens": 0, "cache_bytes": 0, "index": i + 1, "blocks": None,
+            "cache_tokens": 0, "cache_bytes": 0, "index": i + 1,
+            "probability": round(probability, 6), "blocks": None,
         })
         await asyncio.sleep(0)
 

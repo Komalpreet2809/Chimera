@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { API_BASE, SimDone, SimMsg, stream, TickMsg } from "@/lib/api";
+import { useRuntime } from "@/components/runtime";
 
 const PROMPTS = [
   "The history of computing began",
@@ -30,19 +31,22 @@ const POLICIES = [
 type Policy = (typeof POLICIES)[number]["id"];
 
 export default function SchedulerPage() {
+  const runtime = useRuntime();
   const [policy, setPolicy] = useState<Policy>("continuous");
   const [batchSize, setBatchSize] = useState(4);
   const [running, setRunning] = useState(false);
-  const [tick, setTick] = useState<TickMsg | null>(null);
-  const [history, setHistory] = useState<TickMsg[]>([]);
+  const [frames, setFrames] = useState<TickMsg[]>([]);
+  const [playhead, setPlayhead] = useState(-1);
+  const [replaying, setReplaying] = useState(false);
   const [result, setResult] = useState<SimDone["stats"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const closeRef = useRef<(() => void) | null>(null);
 
   const run = useCallback(() => {
     setRunning(true);
-    setTick(null);
-    setHistory([]);
+    setFrames([]);
+    setPlayhead(-1);
+    setReplaying(false);
     setResult(null);
     setError(null);
 
@@ -57,11 +61,12 @@ export default function SchedulerPage() {
       },
       (m) => {
         if (m.type === "tick") {
-          setTick(m);
-          setHistory((h) => [...h, m]);
+          setFrames((current) => [...current, m]);
         } else if (m.type === "done") {
           setResult(m.stats);
           setRunning(false);
+          setPlayhead(0);
+          setReplaying(true);
         } else if (m.type === "error") {
           setError(m.message);
           setRunning(false);
@@ -71,11 +76,31 @@ export default function SchedulerPage() {
     );
   }, [policy, batchSize]);
 
+  useEffect(() => {
+    if (!replaying || playhead < 0) return;
+    const atEnd = playhead >= frames.length - 1;
+    const timer = window.setTimeout(() => {
+      if (atEnd) setReplaying(false);
+      else setPlayhead((current) => current + 1);
+    }, atEnd ? 0 : 110);
+    return () => window.clearTimeout(timer);
+  }, [frames, playhead, replaying]);
+
+  const replay = () => {
+    if (!frames.length) return;
+    setPlayhead(0);
+    setReplaying(true);
+  };
+
+  const tick = playhead >= 0 ? frames[playhead] ?? null : null;
+  const history = playhead >= 0 ? frames.slice(0, playhead + 1) : [];
+
   const capacity = tick?.capacity ?? batchSize;
   const seats = Array.from({ length: capacity });
   const avgUtil = history.length
     ? history.reduce((s, t) => s + t.utilization, 0) / history.length
     : 0;
+  const selectedToken = runtime.tokens[runtime.selected];
 
   return (
     <div className="space-y-5">
@@ -130,8 +155,8 @@ export default function SchedulerPage() {
             </span>
           </label>
           <div className="ml-auto">
-            <Button onClick={run} disabled={running}>
-              {running ? "Running…" : "Run simulation"}
+            <Button onClick={frames.length && !running ? replay : run} disabled={running || replaying}>
+              {running ? "Recording trace…" : replaying ? "Playing traffic…" : frames.length ? "Replay movie" : "Run simulation"}
             </Button>
           </div>
         </div>
@@ -165,6 +190,23 @@ export default function SchedulerPage() {
           hint="time staring at a blank screen"
         />
       </div>
+
+      {selectedToken ? (
+        <div className="linked-seat">
+          <span className="section-label">Selected runtime event</span>
+          <strong className="mono">Token #{selectedToken.index} {JSON.stringify(selectedToken.token)}</strong>
+          <i>→</i><b className="mono">GPU seat #1</b><i>→</i>
+          <span className="mono">{selectedToken.kind} · {selectedToken.latency_ms.toFixed(1)} ms</span>
+        </div>
+      ) : null}
+
+      <Panel title="Request traffic" subtitle="each lane is a request; the playhead is the GPU's current scheduling step">
+        {!tick ? (
+          <Empty shape="rows">Run once to record the scheduler, then watch requests move through the GPU.</Empty>
+        ) : (
+          <TrafficLanes history={history} current={tick} />
+        )}
+      </Panel>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <Panel
@@ -283,6 +325,39 @@ export default function SchedulerPage() {
           )}
         </Panel>
       </div>
+    </div>
+  );
+}
+
+function TrafficLanes({ history, current }: { history: TickMsg[]; current: TickMsg }) {
+  const requests = new Map<number, { id: number; tokens: number; target: number; lastTick: number }>();
+  for (const frame of history) {
+    for (const seat of frame.seated) requests.set(seat.id, { ...seat, lastTick: frame.tick });
+  }
+  const active = new Set(current.seated.map((seat) => seat.id));
+  return (
+    <div className="traffic-movie">
+      <div className="traffic-gpu">
+        <span>GPU · TICK {current.tick}</span>
+        <div>{Array.from({ length: current.capacity }).map((_, index) => {
+          const seat = current.seated[index];
+          return <i key={index} className={seat ? "occupied" : ""}>{seat ? `#${seat.id}` : "—"}</i>;
+        })}</div>
+      </div>
+      <div className="traffic-lanes">
+        {[...requests.values()].map((request) => {
+          const isActive = active.has(request.id);
+          const done = !isActive && request.lastTick < current.tick;
+          return (
+            <div key={request.id} className={isActive ? "is-active" : done ? "is-done" : ""}>
+              <span className="mono">REQ #{request.id}</span>
+              <div><i style={{ width: `${Math.min(100, request.tokens / request.target * 100)}%` }} /></div>
+              <b className="mono">{done ? "done" : isActive ? "on GPU" : "queued"}</b>
+            </div>
+          );
+        })}
+      </div>
+      <p className="traffic-caption">A seat empties, then the next queued request takes it on the following tick. Replay another policy to feel the difference.</p>
     </div>
   );
 }

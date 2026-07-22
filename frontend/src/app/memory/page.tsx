@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { API_BASE, PagedBench, post } from "@/lib/api";
+import { useRuntime } from "@/components/runtime";
 
 export default function MemoryPage() {
+  const runtime = useRuntime();
   const [budget, setBudget] = useState(512);
   const [maxSeq, setMaxSeq] = useState(512);
   const [blockSize, setBlockSize] = useState(16);
@@ -31,9 +33,13 @@ export default function MemoryPage() {
   }, [budget, maxSeq, blockSize]);
 
   useEffect(() => {
-    run();
+    const timer = window.setTimeout(run, 0);
+    return () => window.clearTimeout(timer);
+    // Initial sample only; slider changes are committed by Recompute.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const selectedBlock = runtime.tokens[runtime.selected]?.blocks?.at(-1);
 
   return (
     <div className="space-y-5">
@@ -125,6 +131,7 @@ export default function MemoryPage() {
               budget={data.budget_mb}
               waste={data.naive.waste}
               tone="bad"
+              selectedBlock={undefined}
             />
             <MemoryMap
               title="Paged — blocks on demand"
@@ -135,6 +142,7 @@ export default function MemoryPage() {
               budget={data.budget_mb}
               waste={data.paged.waste}
               tone="good"
+              selectedBlock={selectedBlock}
             />
           </div>
 
@@ -172,6 +180,7 @@ function MemoryMap({
   budget,
   waste,
   tone,
+  selectedBlock,
 }: {
   title: string;
   subtitle: string;
@@ -181,12 +190,18 @@ function MemoryMap({
   budget: number;
   waste: number;
   tone: "good" | "bad";
+  selectedBlock?: number;
 }) {
+  const [hovered, setHovered] = useState<number | null>(null);
   const CELLS = 240;
   const usedCells = Math.round((usedMb / budget) * CELLS);
   const wastedCells = Math.round(((totalMb - usedMb) / budget) * CELLS);
   // Chart marks carry no text, so they take the brighter fill steps.
   const color = tone === "good" ? "var(--good-fill)" : "var(--accent-fill)";
+  const inspected = hovered ?? (selectedBlock === undefined ? null : Math.abs(selectedBlock) % CELLS);
+  const inspectedKind = inspected === null ? null : inspected < usedCells ? "active" : inspected < usedCells + wastedCells ? "reserved" : "free";
+  const owner = inspected === null || inspectedKind === "free" ? null : (inspected % Math.max(1, fit)) + 1;
+  const tokenStart = inspected === null ? 0 : (inspected % Math.max(1, Math.ceil(512 / 16))) * 16;
 
   return (
     <Panel title={title} subtitle={subtitle}>
@@ -195,9 +210,13 @@ function MemoryMap({
           const kind =
             i < usedCells ? "used" : i < usedCells + wastedCells ? "wasted" : "free";
           return (
-            <div
+            <button
               key={i}
-              className="aspect-square rounded-[2px]"
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => setHovered(i)}
+              aria-label={`Physical block ${i}, ${kind}`}
+              className={`memory-cell aspect-square rounded-[2px] ${inspected === i ? "is-inspected" : ""}`}
               style={{
                 background:
                   kind === "used"
@@ -209,10 +228,17 @@ function MemoryMap({
                 // composites toward blush. The inks are already chosen to sit
                 // together, so they don't need turning down.
                 opacity: 1,
+                animationDelay: `${Math.min(i * 3, 420)}ms`,
               }}
             />
           );
         })}
+      </div>
+      <div className="memory-inspector mono">
+        <div><span>PHYSICAL BLOCK</span><strong>{inspected === null ? "hover the map" : `#${inspected}`}</strong></div>
+        <div><span>OWNER</span><strong>{owner ? `Request ${owner}` : "—"}</strong></div>
+        <div><span>TOKENS</span><strong>{owner ? `${tokenStart}–${tokenStart + 15}` : "—"}</strong></div>
+        <div><span>STATUS</span><strong className={inspectedKind ?? ""}>{inspectedKind ?? "ready"}</strong></div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[var(--dim)]">
         <span className="flex items-center gap-1.5">
