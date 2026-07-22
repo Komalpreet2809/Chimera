@@ -49,33 +49,6 @@ export default function RootLayout({
         <RuntimeProvider>
         {/* ---- amber hero band ---- */}
         <div className="relative overflow-hidden bg-[var(--amber)]">
-          {/* doodles */}
-          <svg
-            className="doodle absolute -left-6 top-10 h-24 w-24 opacity-30"
-            viewBox="0 0 100 100"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M12 78c14-10 8-30 22-40M30 84c16-11 10-34 26-45"
-              stroke="#1a1a18"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
-          <svg
-            className="doodle absolute right-8 top-6 h-16 w-16 opacity-30"
-            viewBox="0 0 100 100"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M50 8v22M74 26L60 40M26 26l14 14M86 60H64M14 60h22"
-              stroke="#1a1a18"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-          </svg>
 
           <header className="relative mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4">
             <Link href="/" className="flex shrink-0 items-center gap-2.5">

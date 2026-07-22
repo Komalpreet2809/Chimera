@@ -92,9 +92,6 @@
   --amber-tint: #fef4e4;
   --amber-line: #f5dcb2;
 
-  /* ghost fill for skeleton/empty states */
-  --ghost: #ece2d2;
-
   /* Cards sit on cream, so they need a touch more lift than they would on
      white — otherwise the whole page flattens into one plane. */
   --shadow-sm: 0 1px 2px rgba(26, 26, 24, 0.05), 0 4px 14px rgba(26, 26, 24, 0.06);
@@ -189,13 +186,6 @@ body {
   white-space: nowrap;
 }
 
-/* ---------- doodle accents ---------- */
-.doodle {
-  color: var(--amber);
-  opacity: 0.9;
-  pointer-events: none;
-  user-select: none;
-}
 
 /* ---------- marquee ---------- */
 .marquee {
@@ -238,19 +228,6 @@ body {
   background: var(--dim);
 }
 
-@keyframes pop {
-  from {
-    transform: scale(0.85);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-.pop {
-  animation: pop 160ms ease-out;
-}
 
 /* ---------- runtime debugger ---------- */
 .error-banner {
@@ -406,10 +383,10 @@ a.snapshot-card:hover { transform: translateY(-1px); border-color: var(--accent)
 /* ---------- scheduler movie ---------- */
 .traffic-movie { display: grid; grid-template-columns: 180px 1fr; gap: 18px; }
 .linked-seat { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; border: 1px solid var(--amber-line); border-radius: 12px; background: var(--amber-tint); padding: 11px 14px; font-size: 10px; }
-.linked-seat > strong { color: var(--bad); }
-.linked-seat > b { border-radius: 7px; background: var(--dark); padding: 6px 9px; color: var(--amber); font-weight: 500; }
-.linked-seat > i { color: var(--dim); font-style: normal; }
-.linked-seat > span:last-child { margin-left: auto; color: var(--muted); }
+/* The token is data, not a failure — it was set in the negative ink. */
+.linked-seat > strong { color: var(--text); }
+.linked-seat > span.mono { color: var(--muted); }
+.linked-seat > em { flex-basis: 100%; color: var(--muted); font-style: normal; line-height: 1.5; }
 .traffic-gpu { align-self: start; border-radius: 14px; background: var(--dark); padding: 14px; color: white; }
 .traffic-gpu > span { color: var(--amber); font: 600 10px var(--font-jetbrains); }
 .traffic-gpu > div { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 12px; }
@@ -457,19 +434,10 @@ a.snapshot-card:hover { transform: translateY(-1px); border-color: var(--accent)
 .attention-arc-tokens span { color: var(--dim); font-size: 8px; }
 .attention-arc-tokens b { max-width: 52px; overflow: hidden; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 5px 6px; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 
-@keyframes spin-slow {
-  to {
-    transform: rotate(360deg);
-  }
-}
-.spin-slow {
-  animation: spin-slow 9s linear infinite;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .marquee__track,
-  .spin-slow,
-  .pop {
+  .trace-cursor {
     animation: none;
   }
 }

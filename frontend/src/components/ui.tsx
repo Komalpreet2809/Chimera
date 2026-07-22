@@ -222,49 +222,13 @@ export function Bar({
  * of the thing that's about to appear — so the box reads as "ready" instead of
  * "broken", and the layout doesn't lurch when real data lands.
  */
-export function Empty({
-  children,
-  shape = "bars",
-}: {
-  children: ReactNode;
-  shape?: "bars" | "grid" | "rows" | "none";
-}) {
-  const GHOST = "var(--ghost)";
+export function Empty({ children }: { children: ReactNode }) {
+  // No ghost bars or placeholder grids here. This app's claim is that every
+  // mark on screen is a real measurement, so a skeleton shaped like a chart —
+  // with invented heights — would contradict the one thing it's selling.
+  // An empty panel says it's empty.
   return (
-    <div className="flex min-h-[150px] flex-col items-center justify-center gap-5 px-6 py-4">
-      {shape === "bars" && (
-        <div className="flex h-[72px] items-end gap-[5px]" aria-hidden>
-          {[38, 62, 30, 74, 46, 88, 34, 58, 42, 70, 26, 50].map((h, i) => (
-            <span
-              key={i}
-              className="w-[9px] rounded-t-[3px]"
-              style={{ height: `${h}%`, background: GHOST }}
-            />
-          ))}
-        </div>
-      )}
-      {shape === "grid" && (
-        <div className="grid grid-cols-8 gap-[5px]" aria-hidden>
-          {Array.from({ length: 24 }).map((_, i) => (
-            <span
-              key={i}
-              className="h-[13px] w-[13px] rounded-[3px]"
-              style={{ background: GHOST }}
-            />
-          ))}
-        </div>
-      )}
-      {shape === "rows" && (
-        <div className="w-full max-w-[280px] space-y-2.5" aria-hidden>
-          {[100, 78, 90, 64].map((w, i) => (
-            <span
-              key={i}
-              className="block h-[9px] rounded-full"
-              style={{ width: `${w}%`, background: GHOST }}
-            />
-          ))}
-        </div>
-      )}
+    <div className="flex min-h-[150px] items-center justify-center px-6 py-4">
       <p className="max-w-[42ch] text-center text-[13px] leading-relaxed text-[var(--muted)]">
         {children}
       </p>

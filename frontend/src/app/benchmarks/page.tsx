@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
+import { Badge, Button, Empty, PageHead, Panel, Stat } from "@/components/ui";
 import { API_BASE, CacheBench, post } from "@/lib/api";
 
 export default function BenchmarksPage() {
@@ -33,8 +33,11 @@ export default function BenchmarksPage() {
   return (
     <div className="space-y-5">
       <PageHead kicker="05 — Benchmarks" title="Measured, not claimed.">
-          Measured live on this machine, right now — not numbers from a paper. Each row
-          runs a real forward pass on the engine.
+          The KV cache table below runs live on this machine when you press the button —
+          real forward passes, timed now. The two panels beneath it are{" "}
+          <span className="text-[var(--text)]">recorded</span> results from the repo&apos;s
+          benchmark scripts, not live measurements, because each takes minutes to run.
+          Every one of them is reproducible from the commands shown.
       </PageHead>
 
       <Panel
@@ -52,7 +55,7 @@ export default function BenchmarksPage() {
           </div>
         )}
         {!data ? (
-          <Empty shape="bars">
+          <Empty>
             {loading
               ? "Running real forward passes…"
               : "Press Run to benchmark the engine live."}
@@ -152,7 +155,11 @@ export default function BenchmarksPage() {
       </Panel>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Panel title="Continuous batching" subtitle="measured, 20 users · 8 seats">
+        <Panel
+          title="Continuous batching"
+          subtitle="recorded · 20 users, 8 seats"
+          right={<Badge tone="default">recorded</Badge>}
+        >
           <table className="w-full text-[11px]">
             <thead>
               <tr className="text-left text-[var(--dim)]">
@@ -184,9 +191,16 @@ export default function BenchmarksPage() {
             <em>used</em> — stragglers hold empty seats hostage. Continuous batching
             refills them instantly.
           </p>
+          <p className="mono mt-2 text-[10px] text-[var(--dim)]">
+            reproduce: python backend/scripts/phase4_showdown.py
+          </p>
         </Panel>
 
-        <Panel title="Speculative decoding" subtitle="distilgpt2 drafts · gpt2 verifies">
+        <Panel
+          title="Speculative decoding"
+          subtitle="recorded · distilgpt2 drafts, gpt2 verifies"
+          right={<Badge tone="default">recorded</Badge>}
+        >
           <table className="w-full text-[11px]">
             <thead>
               <tr className="text-left text-[var(--dim)]">
@@ -214,6 +228,9 @@ export default function BenchmarksPage() {
             distilgpt2 is only 2× cheaper than gpt2, so the draft&apos;s own passes eat the
             savings. Speculation pays off when the target dwarfs the draft (a 70B verified
             by a 1B), not at GPT-2 scale. Correct implementation, honest verdict.
+          </p>
+          <p className="mono mt-2 text-[10px] text-[var(--dim)]">
+            reproduce: python backend/scripts/phase6_speculative.py
           </p>
         </Panel>
       </div>

@@ -192,17 +192,21 @@ export default function SchedulerPage() {
       </div>
 
       {selectedToken ? (
+        // The debugger's trace and this simulation are separate runs: that
+        // token came from a single /api/generate request, which never entered
+        // the scheduler. Claiming it occupied a seat here would invent a link
+        // that doesn't exist — so state the actual relationship instead.
         <div className="linked-seat">
-          <span className="section-label">Selected runtime event</span>
+          <span className="section-label">Your debugger trace</span>
           <strong className="mono">Token #{selectedToken.index} {JSON.stringify(selectedToken.token)}</strong>
-          <i>→</i><b className="mono">GPU seat #1</b><i>→</i>
           <span className="mono">{selectedToken.kind} · {selectedToken.latency_ms.toFixed(1)} ms</span>
+          <em>ran as a single request — it never queued for a seat. The simulation below is what changes when 12 arrive at once.</em>
         </div>
       ) : null}
 
       <Panel title="Request traffic" subtitle="each lane is a request; the playhead is the GPU's current scheduling step">
         {!tick ? (
-          <Empty shape="rows">Run once to record the scheduler, then watch requests move through the GPU.</Empty>
+          <Empty>Run once to record the scheduler, then watch requests move through the GPU.</Empty>
         ) : (
           <TrafficLanes history={history} current={tick} />
         )}
@@ -214,7 +218,7 @@ export default function SchedulerPage() {
           subtitle="each slot is a request riding this forward pass"
         >
           {!tick ? (
-            <Empty shape="grid">Run the simulation to watch the batch fill.</Empty>
+            <Empty>Run the simulation to watch the batch fill.</Empty>
           ) : (
             <div className="space-y-3">
               <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.min(capacity, 4)}, minmax(0,1fr))` }}>
