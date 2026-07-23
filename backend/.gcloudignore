@@ -1,0 +1,9 @@
+# Only the app and its deploy files need to reach Cloud Build.
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+tests/
+scripts/
+README_SPACE.md
