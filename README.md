@@ -62,7 +62,7 @@ and the O(N)→O(1) difference appears exactly as theory predicts.
   visible as the empty upper triangle.
 - **Benchmarks** — run the engine's benchmarks live on your own machine.
 
-## Architecture
+## Architectu
 
 ```
 backend/chimera/
